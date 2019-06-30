@@ -1,0 +1,2 @@
+# libcoinbase
+Coinbase C++ API (
