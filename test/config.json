@@ -1,5 +1,8 @@
 {
-  "api": {
-    "port": 8080
+  "websocket": {
+    "feed": {
+      "port": 443,
+      "uri": "wss://ws-feed.pro.coinbase.com"
+    }
   }
 }

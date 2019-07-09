@@ -2,13 +2,6 @@
 #include <iostream>
 #include <fstream>
 
-const char kPathSeparator =
-#ifdef _WIN32
-        '\\';
-#else
-        '/';
-#endif
-
 const coinbase::config::Configuration* coinbase::config::Configuration::load_default() {
     const char *home_dir = std::getenv("HOME");
     std::string config_file = std::string(home_dir) + kPathSeparator + ".coinbase"
@@ -38,3 +31,28 @@ std::vector<std::string> coinbase::config::Configuration::split(const std::strin
     std::vector<std::string> words{it, {}};
     return words;
 }
+
+coinbase::config::WebSocketURI::WebSocketURI(const std::string &uri_txt) {
+    std::smatch matches;
+    if(std::regex_search(uri_txt, matches, this->uri_regex_) && matches.size() == 6) {
+        std::string protocol = matches[1];
+        if (protocol == "wss") {
+            this->port_ = 443;
+        } else {
+            this->port_ = 80;
+        }
+        this->host_ = matches[2];
+        if (matches[3].matched) {
+            this->port_ = std::stoi(matches[4].str());
+        }
+        if (matches[5].matched) {
+            this->path_ = matches[5].str();
+        } else {
+            this->path_ = "/";
+        }
+    } else {
+        throw std::runtime_error("unable to recognized URI: " + uri_txt);
+    }
+}
+
+coinbase::config::WebSocketURI::~WebSocketURI() = default;

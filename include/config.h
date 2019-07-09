@@ -23,15 +23,23 @@
 
 using nlohmann::json;
 
+const char kPathSeparator =
+#ifdef _WIN32
+        '\\';
+#else
+        '/';
+#endif
+
 namespace coinbase {
-    /// @brief simple JSON-based configuration file format for library
     namespace config {
+        /// @brief simple JSON-based configuration file format for library
         class Configuration {
         public:
             static const Configuration* load_default();
 
             Configuration(std::istream& in);
 
+            /// @brief generic getter that extracts a dot-delimited key corresponding to the JSON path structure
             template<class T>
             std::experimental::optional<T> get(const std::string& key) const {
                 auto key_parts = split(key, std::regex("\\."));
@@ -55,6 +63,26 @@ namespace coinbase {
 
             /// @brief utility function to split a string on an arbitrary regular expression
             static std::vector<std::string> split(const std::string& str, const std::regex& on_regexp);
+        };
+
+        /// @brief helper class that can parse a URI string into a host, port and path, with appropriate defaulting
+        class WebSocketURI {
+        public:
+            explicit WebSocketURI(const std::string& uri_txt);
+
+            int get_port() const { return port_; }
+
+            const std::string& get_host() const { return host_; }
+
+            const std::string& get_path() const { return path_; }
+
+            ~WebSocketURI();
+        private:
+            std::regex uri_regex_ = std::regex("(ws|wss):\\/\\/([^\\/#:]+)(:(\\d+))?(.+)?");
+
+            int port_;
+            std::string host_;
+            std::string path_;
         };
     };
 }

@@ -3,8 +3,10 @@
 #include <gtest/gtest.h>
 #include <config.h>
 #include <fstream>
+#include <libgen.h>
 
 using coinbase::config::Configuration;
+using coinbase::config::WebSocketURI;
 
 TEST(Configuration, load_default) {
     ASSERT_THROW({
@@ -14,25 +16,33 @@ TEST(Configuration, load_default) {
 }
 
 TEST(Configuration, get_has_value) {
-    std::ifstream in("config.json");
+    char *base_path = strdup(__FILE__);
+    auto dir = std::string(dirname(base_path));
+    auto config_path = dir + kPathSeparator + "config.json";
+    std::ifstream in(config_path);
     Configuration config(in);
 
-    auto port = config.get<int>("api.port");
-    ASSERT_EQ(8080, port.value());
+    auto uri = config.get<std::string>("websocket.feed.uri");
+    ASSERT_EQ(std::string("wss://ws-feed.pro.coinbase.com"), uri);
 }
 
-TEST(Configuration, get_missing_value1) {
-    std::ifstream in("config.json");
-    Configuration config(in);
-
-    auto port = config.get<int>("no_api.port");
-    ASSERT_FALSE(port);
+TEST(WebSocketURI, create1) {
+    WebSocketURI uri = WebSocketURI("wss://ws-feed.pro.coinbase.com");
+    ASSERT_EQ(443, uri.get_port());
+    ASSERT_EQ("ws-feed.pro.coinbase.com", uri.get_host());
+    ASSERT_EQ("/", uri.get_path());
 }
 
-TEST(Configuration, get_missing_value2) {
-    std::ifstream in("config.json");
-    Configuration config(in);
+TEST(WebSocketURI, create2) {
+    WebSocketURI uri = WebSocketURI("ws://ws-feed.pro.coinbase.com");
+    ASSERT_EQ(80, uri.get_port());
+    ASSERT_EQ("ws-feed.pro.coinbase.com", uri.get_host());
+    ASSERT_EQ("/", uri.get_path());
+}
 
-    auto port = config.get<int>("api.no_port");
-    ASSERT_FALSE(port);
+TEST(WebSocketURI, create3) {
+    WebSocketURI uri = WebSocketURI("ws://ws-feed.pro.coinbase.com:8080/wsapi");
+    ASSERT_EQ(8080, uri.get_port());
+    ASSERT_EQ("ws-feed.pro.coinbase.com", uri.get_host());
+    ASSERT_EQ("/wsapi", uri.get_path());
 }
