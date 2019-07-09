@@ -6,6 +6,13 @@
 
 using coinbase::config::Configuration;
 
+TEST(Configuration, load_default) {
+    ASSERT_THROW({
+        const Configuration *config = Configuration::load_default();
+        delete config;
+    }, std::runtime_error);
+}
+
 TEST(Configuration, get_has_value) {
     std::ifstream in("config.json");
     Configuration config(in);

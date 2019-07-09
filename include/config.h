@@ -28,10 +28,12 @@ namespace coinbase {
     namespace config {
         class Configuration {
         public:
+            static const Configuration* load_default();
+
             Configuration(std::istream& in);
 
             template<class T>
-            std::experimental::optional<T> get(const std::string& key) {
+            std::experimental::optional<T> get(const std::string& key) const {
                 auto key_parts = split(key, std::regex("\\."));
                 std::string key_path;
                 for (const auto &part : key_parts) {
@@ -40,7 +42,7 @@ namespace coinbase {
                 }
                 auto key_json_ptr = json::json_pointer(key_path);
                 try {
-                    auto val = this->parsed_json.at(key_json_ptr);
+                    auto val = this->parsed_json_.at(key_json_ptr);
                     return std::experimental::make_optional<T>(val);
                 } catch (json::out_of_range& e) {
                     return std::experimental::nullopt;
@@ -49,10 +51,10 @@ namespace coinbase {
 
             ~Configuration();
         private:
-            json parsed_json;
+            json parsed_json_;
 
             /// @brief utility function to split a string on an arbitrary regular expression
-            std::vector<std::string> split(const std::string& str, const std::regex& on_regexp);
+            static std::vector<std::string> split(const std::string& str, const std::regex& on_regexp);
         };
     };
 }
