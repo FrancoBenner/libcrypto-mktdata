@@ -1,0 +1,41 @@
+# This module tries to find LIBIXWEBSOCKETS library and include files
+#
+# LIBIXWEBSOCKETS_INCLUDE_DIR, path where to find LIBIXWEBSOCKETS.h
+# LIBIXWEBSOCKETS_LIBRARY_DIR, path where to find LIBIXWEBSOCKETS.so
+# LIBIXWEBSOCKETS_LIBRARIES, the library to link against
+# LIBIXWEBSOCKETS_FOUND, If false, do not try to use LIBIXWEBSOCKETS
+#
+# This currently works probably only for Linux
+
+include(FindPackageHandleStandardArgs)
+SET ( LIBIXWEBSOCKETS_FOUND FALSE )
+
+FIND_PATH ( LIBIXWEBSOCKETS_INCLUDE_DIR NAMES ixwebsocket/IXWebSocket.h
+        HINTS /usr/local/include /usr/include
+        )
+
+FIND_LIBRARY ( LIBIXWEBSOCKETS_LIBRARIES NAMES ixwebsocket libixwebsocket
+        HINTS /usr/local/lib /usr/lib
+        )
+
+GET_FILENAME_COMPONENT( LIBIXWEBSOCKETS_LIBRARY_DIR ${LIBIXWEBSOCKETS_LIBRARIES} PATH )
+
+IF ( LIBIXWEBSOCKETS_INCLUDE_DIR )
+    IF ( LIBIXWEBSOCKETS_LIBRARIES )
+        SET ( LIBIXWEBSOCKETS_FOUND TRUE )
+    ENDIF ( LIBIXWEBSOCKETS_LIBRARIES )
+ENDIF ( LIBIXWEBSOCKETS_INCLUDE_DIR )
+
+
+IF ( LIBIXWEBSOCKETS_FOUND )
+    MARK_AS_ADVANCED(
+            LIBIXWEBSOCKETS_LIBRARY_DIR
+            LIBIXWEBSOCKETS_INCLUDE_DIR
+            LIBIXWEBSOCKETS_LIBRARIES
+    )
+ENDIF ( )
+
+find_package_handle_standard_args(LIBIXWEBSOCKETS
+        DEFAULT_MSG
+        LIBIXWEBSOCKETS_INCLUDE_DIR
+        LIBIXWEBSOCKETS_LIBRARIES)

@@ -15,18 +15,22 @@
 #ifndef LIBCOINBASE_WSAPI_H
 #define LIBCOINBASE_WSAPI_H
 
-#include <libwebsockets.h>
+#include <ixwebsocket/IXWebSocket.h>
+#include <ixwebsocket/IXSocket.h>
 
-namespace coinbase {
-    namespace exchange {
-        namespace marketdata {
-            class MarketdataClient {
+namespace coinbase::exchange::marketdata {
+    class MarketdataClient {
+    public:
+        explicit MarketdataClient();
 
-                void connect();
-                void disconnect();
-            };
-        }
-    }
+        void connect();
+
+        void disconnect();
+
+        ~MarketdataClient();
+    private:
+        ix::WebSocket *websocket;
+    };
 }
 
 #endif //LIBCOINBASE_WSAPI_H
