@@ -17,11 +17,14 @@ coinbase::exchange::marketdata::MarketdataClient::MarketdataClient() {
             {
                 if (msg->type == ix::WebSocketMessageType::Open) {
                     // start subscription to heartbeat channel
-                    this->websocket->send("{\"type\": \"subscribe\", \"channels\": [ { \"name\": \"heartbeat\", \"product_ids\": [\"BTC-USD\"] } ] }");
+                    this->websocket->send(
+                            R"({"type": "subscribe", "channels": [ { "name": "matches", "product_ids": ["BTC-USD"] }, { "name": "heartbeat", "product_ids": ["BTC-USD"] }, { "name": "level2", "product_ids": ["BTC-USD"] }, { "name": "full", "product_ids": ["BTC-USD"] }, {"name": "status" } ] })");
+                } else if (msg->type == ix::WebSocketMessageType::Close) {
+                    std::cout << "connection closed" << std::endl;
                 } else if (msg->type == ix::WebSocketMessageType::Message) {
                     std::cout << msg->str << std::endl;
                 } else {
-                    std::cout << "UNKNOWN" << std::endl;
+                    std::cout << "Unknown message type" << std::endl;
                 }
             });
 }

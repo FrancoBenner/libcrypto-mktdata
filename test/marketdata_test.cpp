@@ -12,5 +12,8 @@ using namespace std::chrono_literals;
 TEST(MarketDataClient, connect) {
     auto client = coinbase::exchange::marketdata::MarketdataClient();
     client.connect();
+    for (int i = 0; i < 10; i++) {
+        std::this_thread::sleep_for(1s);
+    }
     client.disconnect();
 }
