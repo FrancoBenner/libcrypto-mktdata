@@ -10,7 +10,9 @@
 using namespace std::chrono_literals;
 
 TEST(MarketDataClient, connect) {
-    auto client = coinbase::exchange::marketdata::MarketdataClient();
+    std::list<coinbase::exchange::marketdata::ProductId> products = {};
+    auto sub = coinbase::exchange::marketdata::Subscription(products);
+    auto client = coinbase::exchange::marketdata::MarketdataClient(sub);
     client.connect();
     for (int i = 0; i < 10; i++) {
         std::this_thread::sleep_for(1s);

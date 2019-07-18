@@ -1,7 +1,35 @@
 #include <marketdata.h>
 #include <iostream>
 
-coinbase::exchange::marketdata::MarketdataClient::MarketdataClient() {
+coinbase::exchange::marketdata::Currency::Currency(const std::string& ccy_code) : ccy_code_(ccy_code) {}
+
+std::ostream& coinbase::exchange::marketdata::operator << (std::ostream& out, const coinbase::exchange::marketdata::Currency& ccy) {
+    out << ccy.get_ccy_code();
+    return out;
+}
+
+coinbase::exchange::marketdata::ProductId::ProductId(const Currency& base_ccy, const Currency& quote_ccy)
+    : base_ccy_(base_ccy), quote_ccy_(quote_ccy) { }
+
+std::ostream& coinbase::exchange::marketdata::operator << (std::ostream& out, const coinbase::exchange::marketdata::ProductId& product_id) {
+    out << product_id.get_quote_ccy() << "-" << product_id.get_base_ccy();
+    return out;
+}
+
+coinbase::exchange::marketdata::Subscription::Subscription(const std::list<ProductId>& product_ids)
+    : product_ids_(product_ids) { }
+
+std::ostream& coinbase::exchange::marketdata::operator << (std::ostream& out, const coinbase::exchange::marketdata::Subscription& subscription) {
+    nlohmann::json sub_json;
+    sub_json["type"] = "subscribe";
+    sub_json["channels"] = { "BTC-USD" };
+    out << sub_json;
+    return out;
+}
+
+coinbase::exchange::marketdata::MarketdataClient::MarketdataClient(const Subscription& subscription) {
+    std::cout << subscription << std::endl;
+
     this->websocket = new ix::WebSocket();
 
     std::string url("wss://ws-feed.pro.coinbase.com/");

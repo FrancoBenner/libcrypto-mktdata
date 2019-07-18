@@ -9,7 +9,6 @@ include(conan.cmake)
 conan_cmake_run(REQUIRES fmt/5.3.0@bincrafters/stable
                          libuv/1.27.0@bincrafters/stable
                          jsonformoderncpp/3.6.1@vthiery/stable
-                         rapidjson/1.1.0@bincrafters/stable
                          gtest/1.8.1@bincrafters/stable
         BASIC_SETUP BUILD missing)
 

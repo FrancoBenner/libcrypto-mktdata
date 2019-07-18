@@ -17,11 +17,70 @@
 
 #include <ixwebsocket/IXWebSocket.h>
 #include <ixwebsocket/IXSocket.h>
+#include <nlohmann/json.hpp>
 
 namespace coinbase::exchange::marketdata {
+    class Currency {
+    public:
+        Currency(const std::string& ccy_code);
+
+        const std::string& get_ccy_code() const {
+            return ccy_code_;
+        }
+
+        bool operator == (const Currency &other) const {
+            return(this->get_ccy_code() == other.get_ccy_code());
+        }
+
+        ~Currency() = default;
+    private:
+        const std::string& ccy_code_;
+    };
+
+    std::ostream& operator << (std::ostream& out, const Currency& ccy);
+
+    class ProductId {
+    public:
+        ProductId(const Currency& base_ccy, const Currency& quote_ccy);
+
+        const Currency& get_base_ccy() const {
+            return base_ccy_;
+        }
+
+        const Currency& get_quote_ccy() const {
+            return quote_ccy_;
+        }
+
+        bool operator == (const ProductId &other) const {
+            return (this->get_base_ccy() == other.get_base_ccy())
+                && (this->get_quote_ccy() == other.get_quote_ccy());
+        }
+
+        ~ProductId() = default;
+    private:
+        const Currency& base_ccy_;
+
+        const Currency& quote_ccy_;
+    };
+
+    std::ostream& operator << (std::ostream& out, const ProductId& product_id);
+
+    class Subscription {
+    public:
+        Subscription(const std::list<ProductId>& product_ids);
+
+        const std::list<ProductId>& get_product_ids() const;
+
+        ~Subscription() = default;
+    private:
+        const std::list<ProductId>& product_ids_;
+    };
+
+    std::ostream& operator << (std::ostream& out, const Subscription& subscription);
+
     class MarketdataClient {
     public:
-        explicit MarketdataClient();
+        MarketdataClient(const Subscription& subscription);
 
         void connect();
 
