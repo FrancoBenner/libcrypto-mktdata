@@ -8,7 +8,7 @@ std::ostream& coinbase::exchange::marketdata::operator << (std::ostream& out, co
     return out;
 }
 
-coinbase::exchange::marketdata::ProductId::ProductId(const Currency& base_ccy, const Currency& quote_ccy)
+coinbase::exchange::marketdata::ProductId::ProductId(const Currency& quote_ccy, const Currency& base_ccy)
     : base_ccy_(base_ccy), quote_ccy_(quote_ccy) { }
 
 std::ostream& coinbase::exchange::marketdata::operator << (std::ostream& out, const coinbase::exchange::marketdata::ProductId& product_id) {
