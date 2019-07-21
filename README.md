@@ -1,2 +1,2 @@
-# libcoinbase
-Coinbase C++ API (Experimental)
+# libcrypto-marketdata
+Crypto exchange marketdata feed handler C++ API (Experimental)
