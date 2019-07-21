@@ -1,5 +1,6 @@
 #include <marketdata.h>
 #include <iostream>
+#include <sstream>
 
 coinbase::exchange::marketdata::Currency::Currency(const std::string& ccy_code) : ccy_code_(ccy_code) {}
 
@@ -51,6 +52,13 @@ coinbase::exchange::marketdata::MarketdataClient::MarketdataClient(const Subscri
                     std::cout << "connection closed" << std::endl;
                 } else if (msg->type == ix::WebSocketMessageType::Message) {
                     std::cout << msg->str << std::endl;
+                } else if (msg->type == ix::WebSocketMessageType::Error) {
+                    std::stringstream ss;
+                    ss << "Connection error: " << msg->errorInfo.reason      << std::endl;
+                    ss << "#retries: "         << msg->errorInfo.retries     << std::endl;
+                    ss << "Wait time(ms): "    << msg->errorInfo.wait_time   << std::endl;
+                    ss << "HTTP Status: "      << msg->errorInfo.http_status << std::endl;
+                    std::cout << ss.str() << std::endl;
                 } else {
                     std::cout << "Unknown message type" << std::endl;
                 }
