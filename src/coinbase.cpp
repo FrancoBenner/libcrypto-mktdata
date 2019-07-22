@@ -1,26 +1,22 @@
-#include <marketdata.h>
+#include <cloudwall/crypto-mktdata/coinbase.h>
 #include <iostream>
 #include <sstream>
 
-coinbase::exchange::marketdata::Currency::Currency(const std::string& ccy_code) : ccy_code_(ccy_code) {}
+using namespace cloudwall::coinbase::marketdata;
+using cloudwall::core::marketdata::Currency;
 
-std::ostream& coinbase::exchange::marketdata::operator << (std::ostream& out, const coinbase::exchange::marketdata::Currency& ccy) {
-    out << ccy.get_ccy_code();
-    return out;
-}
-
-coinbase::exchange::marketdata::ProductId::ProductId(const Currency& quote_ccy, const Currency& base_ccy)
+ProductId::ProductId(const Currency& quote_ccy, const Currency& base_ccy)
     : base_ccy_(base_ccy), quote_ccy_(quote_ccy) { }
 
-std::ostream& coinbase::exchange::marketdata::operator << (std::ostream& out, const coinbase::exchange::marketdata::ProductId& product_id) {
+std::ostream& cloudwall::coinbase::marketdata::operator << (std::ostream& out, const ProductId& product_id) {
     out << product_id.get_quote_ccy() << "-" << product_id.get_base_ccy();
     return out;
 }
 
-coinbase::exchange::marketdata::Subscription::Subscription(const std::list<ProductId>& product_ids)
+Subscription::Subscription(const std::list<ProductId>& product_ids)
     : product_ids_(product_ids) { }
 
-std::ostream& coinbase::exchange::marketdata::operator << (std::ostream& out, const coinbase::exchange::marketdata::Subscription& subscription) {
+std::ostream& cloudwall::coinbase::marketdata::operator << (std::ostream& out, const Subscription& subscription) {
     nlohmann::json sub_json;
     sub_json["type"] = "subscribe";
     sub_json["channels"] = { "BTC-USD" };
@@ -28,7 +24,7 @@ std::ostream& coinbase::exchange::marketdata::operator << (std::ostream& out, co
     return out;
 }
 
-coinbase::exchange::marketdata::MarketdataClient::MarketdataClient(const Subscription& subscription) {
+MarketdataClient::MarketdataClient(const Subscription& subscription) {
     std::cout << subscription << std::endl;
 
     this->websocket = new ix::WebSocket();
@@ -65,15 +61,15 @@ coinbase::exchange::marketdata::MarketdataClient::MarketdataClient(const Subscri
             });
 }
 
-void coinbase::exchange::marketdata::MarketdataClient::connect() {
+void MarketdataClient::connect() {
     this->websocket->start();
 }
 
-void coinbase::exchange::marketdata::MarketdataClient::disconnect() {
+void MarketdataClient::disconnect() {
     this->websocket->stop();
 }
 
 
-coinbase::exchange::marketdata::MarketdataClient::~MarketdataClient() {
+MarketdataClient::~MarketdataClient() {
     delete this->websocket;
 }

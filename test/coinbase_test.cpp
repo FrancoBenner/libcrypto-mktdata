@@ -5,10 +5,10 @@
 #include <thread>
 
 #include <gtest/gtest.h>
-#include <marketdata.h>
+#include <cloudwall/crypto-mktdata/coinbase.h>
 
 using namespace std::chrono_literals;
-using namespace coinbase::exchange::marketdata;
+using namespace cloudwall::coinbase::marketdata;
 
 TEST(Currency, init) {
     Currency ccy1 = Currency("BTC");
@@ -36,9 +36,9 @@ TEST(ProductId, init) {
 }
 
 TEST(MarketDataClient, connect) {
-    std::list<coinbase::exchange::marketdata::ProductId> products = {};
-    auto sub = coinbase::exchange::marketdata::Subscription(products);
-    auto client = coinbase::exchange::marketdata::MarketdataClient(sub);
+    std::list<ProductId> products = {};
+    auto sub = Subscription(products);
+    auto client = MarketdataClient(sub);
     client.connect();
     for (int i = 0; i < 5; i++) {
         std::this_thread::sleep_for(1s);

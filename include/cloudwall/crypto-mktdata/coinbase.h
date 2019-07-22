@@ -12,33 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef LIBCOINBASE_WSAPI_H
-#define LIBCOINBASE_WSAPI_H
+#ifndef CRYPTO_MKTDATA_COINBASE_H
+#define CRYPTO_MKTDATA_COINBASE_H
 
 #include <ixwebsocket/IXWebSocket.h>
 #include <ixwebsocket/IXSocket.h>
 #include <nlohmann/json.hpp>
 
-namespace coinbase::exchange::marketdata {
-    class Currency {
-    public:
-        Currency(const std::string& ccy_code);
+#include <cloudwall/crypto-mktdata/core.h>
 
-        const std::string& get_ccy_code() const {
-            return ccy_code_;
-        }
+using cloudwall::core::marketdata::Currency;
 
-        bool operator == (const Currency &other) const {
-            return(this->get_ccy_code() == other.get_ccy_code());
-        }
-
-        ~Currency() = default;
-    private:
-        const std::string& ccy_code_;
-    };
-
-    std::ostream& operator << (std::ostream& out, const Currency& ccy);
-
+namespace cloudwall::coinbase::marketdata {
     class ProductId {
     public:
         ProductId(const Currency& quote_ccy, const Currency& base_ccy);
@@ -67,7 +52,7 @@ namespace coinbase::exchange::marketdata {
 
     class Subscription {
     public:
-        Subscription(const std::list<ProductId>& product_ids);
+        explicit Subscription(const std::list<ProductId>& product_ids);
 
         const std::list<ProductId>& get_product_ids() const;
 
@@ -80,7 +65,7 @@ namespace coinbase::exchange::marketdata {
 
     class MarketdataClient {
     public:
-        MarketdataClient(const Subscription& subscription);
+        explicit MarketdataClient(const Subscription& subscription);
 
         void connect();
 
@@ -92,4 +77,4 @@ namespace coinbase::exchange::marketdata {
     };
 }
 
-#endif //LIBCOINBASE_WSAPI_H
+#endif //CRYPTO_MKTDATA_COINBASE_H

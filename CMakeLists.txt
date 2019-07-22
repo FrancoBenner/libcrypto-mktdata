@@ -19,8 +19,9 @@ find_package(ZLIB REQUIRED)
 include_directories(include ${LIBIXWEBSOCKETS_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR})
 set(LIBS ${LIBS} ${CONAN_LIBS} ${LIBIXWEBSOCKETS_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES})
 
-add_library(coinbase src/config.cpp src/marketdata.cpp)
+add_library(libcrypto-mktdata src/core.cpp include/cloudwall/crypto-mktdata/core.h
+        src/coinbase.cpp include/cloudwall/crypto-mktdata/coinbase.h)
 
-add_executable(coinbase_test test/config_test.cpp test/marketdata_test.cpp)
-target_link_libraries(coinbase_test coinbase ${LIBS})
+add_executable(libcrypto-mktdata_test test/coinbase_test.cpp)
+target_link_libraries(libcrypto-mktdata_test libcrypto-mktdata ${LIBS})
 
