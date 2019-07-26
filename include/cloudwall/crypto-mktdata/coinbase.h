@@ -15,9 +15,12 @@
 #ifndef CRYPTO_MKTDATA_COINBASE_H
 #define CRYPTO_MKTDATA_COINBASE_H
 
+#include <fmt/core.h>
 #include <ixwebsocket/IXWebSocket.h>
 #include <ixwebsocket/IXSocket.h>
-#include <nlohmann/json.hpp>
+#include <rapidjson/pointer.h>
+#include <rapidjson/ostreamwrapper.h>
+#include <rapidjson/writer.h>
 
 #include <cloudwall/crypto-mktdata/core.h>
 
@@ -50,15 +53,33 @@ namespace cloudwall::coinbase::marketdata {
 
     std::ostream& operator << (std::ostream& out, const ProductId& product_id);
 
+    class Channel {
+    public:
+        Channel(const std::string& name, const std::list<ProductId>& product_ids);
+
+        const std::string& get_name() const {
+            return name_;
+        }
+
+        const std::list<ProductId>& get_product_ids() const {
+            return product_ids_;
+        }
+    private:
+        const std::string& name_;
+        const std::list<ProductId>& product_ids_;
+    };
+
     class Subscription {
     public:
-        explicit Subscription(const std::list<ProductId>& product_ids);
+        explicit Subscription(const std::list<Channel>& channels);
 
-        const std::list<ProductId>& get_product_ids() const;
+        const std::list<Channel>& get_channels() const {
+            return channels_;
+        }
 
         ~Subscription() = default;
     private:
-        const std::list<ProductId>& product_ids_;
+        const std::list<Channel>& channels_;
     };
 
     std::ostream& operator << (std::ostream& out, const Subscription& subscription);

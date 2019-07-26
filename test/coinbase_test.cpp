@@ -36,8 +36,17 @@ TEST(ProductId, init) {
 }
 
 TEST(MarketDataClient, connect) {
-    std::list<ProductId> products = {};
-    auto sub = Subscription(products);
+    std::list<ProductId> products({
+        ProductId(Currency("BTC"),Currency("USD"))
+    });
+    std::list<Channel> channels({
+        Channel("status", { }),
+        Channel("heartbeat", products),
+        Channel("matches", products),
+        Channel("level2", products),
+        Channel("full", products)
+    });
+    auto sub = Subscription(channels);
     auto client = MarketdataClient(sub);
     client.connect();
     for (int i = 0; i < 5; i++) {

@@ -13,20 +13,41 @@ std::ostream& cloudwall::coinbase::marketdata::operator << (std::ostream& out, c
     return out;
 }
 
-Subscription::Subscription(const std::list<ProductId>& product_ids)
-    : product_ids_(product_ids) { }
+Channel::Channel(const std::string &name, const std::list<ProductId> &product_ids)
+    : name_(name), product_ids_(product_ids) { }
+
+Subscription::Subscription(const std::list<Channel>& channels)
+    : channels_(channels) { }
 
 std::ostream& cloudwall::coinbase::marketdata::operator << (std::ostream& out, const Subscription& subscription) {
-    nlohmann::json sub_json;
-    sub_json["type"] = "subscribe";
-    sub_json["channels"] = { "BTC-USD" };
-    out << sub_json;
+    rapidjson::Document d;
+    rapidjson::Pointer("/type").Set(d, "subscribe");
+
+    int i = 0;
+    const std::list<Channel> &channels = subscription.get_channels();
+    for (auto channel_iter = channels.begin(); channel_iter != channels.end(); i++, channel_iter++) {
+        auto channel = *channel_iter;
+        auto channel_json_ptr = fmt::format("/channels/{0}/name", i);
+        rapidjson::Pointer(channel_json_ptr.c_str()).Set(d, channel.get_name().c_str());
+
+        int j = 0;
+        const std::list<ProductId> &product_ids = channel.get_product_ids();
+        for (auto product_id_iter = product_ids.begin(); product_id_iter != product_ids.end(); j++, product_id_iter++) {
+            auto product_id = *product_id_iter;
+            auto id_json_ptr = fmt::format("/channels/{0}/product_ids/{1}", i, j);
+            auto product_id_txt = fmt::format("{0}-{1}", product_id.get_quote_ccy().get_ccy_code(),
+                    product_id.get_base_ccy().get_ccy_code());
+            rapidjson::Pointer(id_json_ptr.c_str()).Set(d, product_id_txt.c_str());
+        }
+    }
+
+    rapidjson::OStreamWrapper osw(out);
+    rapidjson::Writer<rapidjson::OStreamWrapper> writer(osw);
+    d.Accept(writer);
     return out;
 }
 
 MarketdataClient::MarketdataClient(const Subscription& subscription) {
-    std::cout << subscription << std::endl;
-
     this->websocket = new ix::WebSocket();
 
     std::string url("wss://ws-feed.pro.coinbase.com/");
@@ -38,12 +59,13 @@ MarketdataClient::MarketdataClient(const Subscription& subscription) {
 
     // Setup a callback to be fired when a message or an event (open, close, error) is received
     websocket->setOnMessageCallback(
-            [this](const ix::WebSocketMessagePtr& msg)
+            [this, subscription](const ix::WebSocketMessagePtr& msg)
             {
                 if (msg->type == ix::WebSocketMessageType::Open) {
                     // start subscription to heartbeat channel
-                    this->websocket->send(
-                            R"({"type": "subscribe", "channels": [ { "name": "matches", "product_ids": ["BTC-USD"] }, { "name": "heartbeat", "product_ids": ["BTC-USD"] }, { "name": "level2", "product_ids": ["BTC-USD"] }, { "name": "full", "product_ids": ["BTC-USD"] }, {"name": "status" } ] })");
+                    std::stringstream ss;
+                    ss << subscription;
+                    this->websocket->send(ss.str());
                 } else if (msg->type == ix::WebSocketMessageType::Close) {
                     std::cout << "connection closed" << std::endl;
                 } else if (msg->type == ix::WebSocketMessageType::Message) {
