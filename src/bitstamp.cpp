@@ -19,12 +19,12 @@
 #include <cloudwall/crypto-mktdata/bitstamp.h>
 
 using namespace cloudwall::bitstamp::marketdata;
+
 using cloudwall::core::marketdata::Channel;
+using cloudwall::core::marketdata::RawFeedMessage;
 
-RawFeedClient::RawFeedClient(const Subscription& subscription, const OnRawFeedMessageCallback& callback)
-        : callback_(callback) {
-    this->websocket_ = new ix::WebSocket();
-
+BitstampRawFeedClient::BitstampRawFeedClient(const Subscription& subscription, const OnRawFeedMessageCallback& callback)
+        : RawFeedClient(new ix::WebSocket(), callback) {
     std::string url("wss://ws.bitstamp.net/");
     websocket_->setUrl(url);
 
@@ -84,16 +84,4 @@ RawFeedClient::RawFeedClient(const Subscription& subscription, const OnRawFeedMe
                     spdlog::error("Unknown message type");
                 }
             });
-}
-
-void RawFeedClient::connect() {
-    this->websocket_->start();
-}
-
-void RawFeedClient::disconnect() {
-    this->websocket_->stop();
-}
-
-RawFeedClient::~RawFeedClient() {
-    delete this->websocket_;
 }

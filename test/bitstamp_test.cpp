@@ -8,9 +8,12 @@
 #include <cloudwall/crypto-mktdata/bitstamp.h>
 
 using namespace std::chrono_literals;
-using namespace cloudwall::bitstamp::marketdata;
 
+using cloudwall::bitstamp::marketdata::BitstampRawFeedClient;
 using cloudwall::core::marketdata::Channel;
+using cloudwall::core::marketdata::Currency;
+using cloudwall::core::marketdata::CurrencyPair;
+using cloudwall::core::marketdata::RawFeedMessage;
 
 TEST(BitstampRawFeedClient, connect) {
     auto ccy_pair = CurrencyPair(Currency("BTC"), Currency("USD"));
@@ -26,7 +29,7 @@ TEST(BitstampRawFeedClient, connect) {
         spdlog::info("Incoming message: {}", msg.get_raw_json());
         ASSERT_FALSE(msg.get_raw_json().empty());
     };
-    auto client = RawFeedClient(sub, callback);
+    auto client = BitstampRawFeedClient(sub, callback);
     client.connect();
     for (int i = 0; i < 5; i++) {
         std::this_thread::sleep_for(1s);

@@ -19,6 +19,9 @@
 #include <list>
 #include <ostream>
 
+#include <ixwebsocket/IXWebSocket.h>
+#include <ixwebsocket/IXSocket.h>
+
 namespace cloudwall::core::marketdata {
     /// @brief a reference to a cryptocurrency (e.g. BTC) or fiat currency (e.g. USD)
     class Currency {
@@ -112,6 +115,28 @@ namespace cloudwall::core::marketdata {
 
     /// @brief callback function made every time a new message is received on a websocket channel
     using OnRawFeedMessageCallback = std::function<void(const RawFeedMessage&)>;
+
+    /// @brief common interface for a raw message feed client based on websockets
+    class RawFeedClient {
+    public:
+        RawFeedClient(ix::WebSocket* websocket, const OnRawFeedMessageCallback& callback)
+            : websocket_(websocket), callback_(callback) { }
+
+        void connect() {
+            websocket_->start();
+        }
+
+        void disconnect() {
+            websocket_->stop();
+        }
+
+        ~RawFeedClient() {
+            delete websocket_;
+        }
+    protected:
+        ix::WebSocket *websocket_;
+        const OnRawFeedMessageCallback& callback_;
+    };
 }
 
 #endif //CRYPTO_MKTDATA_CORE_H

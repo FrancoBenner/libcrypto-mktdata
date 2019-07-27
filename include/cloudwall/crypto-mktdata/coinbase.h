@@ -25,30 +25,18 @@
 
 #include <cloudwall/crypto-mktdata/core.h>
 
-using cloudwall::core::marketdata::Currency;
-using cloudwall::core::marketdata::CurrencyPair;
 using cloudwall::core::marketdata::OnRawFeedMessageCallback;
-using cloudwall::core::marketdata::RawFeedMessage;
+using cloudwall::core::marketdata::RawFeedClient;
 using cloudwall::core::marketdata::Subscription;
 
 /// @brief Coinbase Pro websocket API
 /// @see https://docs.pro.coinbase.com/
 namespace cloudwall::coinbase::marketdata {
-    std::ostream& operator << (std::ostream& out, const Currency& ccy);
-    std::ostream& operator << (std::ostream& out, const CurrencyPair& ccy_pair);
-
-    class RawFeedClient {
+    class CoinbaseRawFeedClient : public RawFeedClient {
     public:
-        RawFeedClient(const Subscription& subscription, const OnRawFeedMessageCallback& callback);
+        CoinbaseRawFeedClient(const Subscription& subscription, const OnRawFeedMessageCallback& callback);
 
-        void connect();
-
-        void disconnect();
-
-        ~RawFeedClient();
-    private:
-        ix::WebSocket *websocket_;
-        const OnRawFeedMessageCallback& callback_;
+        ~CoinbaseRawFeedClient() = default;
     };
 }
 

@@ -8,9 +8,12 @@
 #include <cloudwall/crypto-mktdata/bitmex.h>
 
 using namespace std::chrono_literals;
-using namespace cloudwall::bitmex::marketdata;
 
+using cloudwall::bitmex::marketdata::BitMexRawFeedClient;
 using cloudwall::core::marketdata::Channel;
+using cloudwall::core::marketdata::Currency;
+using cloudwall::core::marketdata::CurrencyPair;
+using cloudwall::core::marketdata::RawFeedMessage;
 
 TEST(BitMexRawFeedClient, connect) {
     auto ccy_pair = CurrencyPair(Currency("XBT"), Currency("USD"));
@@ -26,7 +29,7 @@ TEST(BitMexRawFeedClient, connect) {
         spdlog::info("Incoming message: {}", msg.get_raw_json());
         ASSERT_FALSE(msg.get_raw_json().empty());
     };
-    auto client = RawFeedClient(sub, callback);
+    auto client = BitMexRawFeedClient(sub, callback);
     client.connect();
     for (int i = 0; i < 5; i++) {
         std::this_thread::sleep_for(1s);

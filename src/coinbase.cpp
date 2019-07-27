@@ -17,12 +17,12 @@
 #include <sstream>
 
 using namespace cloudwall::coinbase::marketdata;
+
 using cloudwall::core::marketdata::Channel;
+using cloudwall::core::marketdata::RawFeedMessage;
 
-RawFeedClient::RawFeedClient(const Subscription& subscription, const OnRawFeedMessageCallback& callback)
-        : callback_(callback) {
-    this->websocket_ = new ix::WebSocket();
-
+CoinbaseRawFeedClient::CoinbaseRawFeedClient(const Subscription& subscription,
+        const OnRawFeedMessageCallback& callback) : RawFeedClient(new ix::WebSocket(), callback) {
     std::string url("wss://ws-feed.pro.coinbase.com/");
     websocket_->setUrl(url);
 
@@ -82,16 +82,3 @@ RawFeedClient::RawFeedClient(const Subscription& subscription, const OnRawFeedMe
                 }
             });
 }
-
-void RawFeedClient::connect() {
-    this->websocket_->start();
-}
-
-void RawFeedClient::disconnect() {
-    this->websocket_->stop();
-}
-
-RawFeedClient::~RawFeedClient() {
-    delete this->websocket_;
-}
-
