@@ -17,50 +17,7 @@
 #include <sstream>
 
 using namespace cloudwall::coinbase::marketdata;
-
-std::ostream& cloudwall::coinbase::marketdata::operator << (std::ostream& out, const ProductId& product_id) {
-    out << product_id.get_quote_ccy() << "-" << product_id.get_base_ccy();
-    return out;
-}
-
-std::ostream& cloudwall::coinbase::marketdata::operator << (std::ostream& out, const Currency& ccy) {
-    out << ccy.get_ccy_code();
-    return out;
-}
-
-Channel::Channel(const std::string &name, const std::list<ProductId> &product_ids)
-    : name_(name), product_ids_(product_ids) { }
-
-Subscription::Subscription(const std::list<Channel>& channels)
-    : channels_(channels) { }
-
-std::ostream& cloudwall::coinbase::marketdata::operator << (std::ostream& out, const Subscription& subscription) {
-    rapidjson::Document d;
-    rapidjson::Pointer("/type").Set(d, "subscribe");
-
-    int i = 0;
-    const std::list<Channel> &channels = subscription.get_channels();
-    for (auto channel_iter = channels.begin(); channel_iter != channels.end(); i++, channel_iter++) {
-        auto channel = *channel_iter;
-        auto channel_json_ptr = fmt::format("/channels/{0}/name", i);
-        rapidjson::Pointer(channel_json_ptr.c_str()).Set(d, channel.get_name().c_str());
-
-        int j = 0;
-        const std::list<ProductId> &product_ids = channel.get_product_ids();
-        for (auto product_id_iter = product_ids.begin(); product_id_iter != product_ids.end(); j++, product_id_iter++) {
-            auto product_id = *product_id_iter;
-            auto id_json_ptr = fmt::format("/channels/{0}/product_ids/{1}", i, j);
-            auto product_id_txt = fmt::format("{0}-{1}", product_id.get_quote_ccy().get_ccy_code(),
-                    product_id.get_base_ccy().get_ccy_code());
-            rapidjson::Pointer(id_json_ptr.c_str()).Set(d, product_id_txt.c_str());
-        }
-    }
-
-    rapidjson::OStreamWrapper osw(out);
-    rapidjson::Writer<rapidjson::OStreamWrapper> writer(osw);
-    d.Accept(writer);
-    return out;
-}
+using cloudwall::core::marketdata::Channel;
 
 RawFeedClient::RawFeedClient(const Subscription& subscription, const OnRawFeedMessageCallback& callback)
         : callback_(callback) {
@@ -78,9 +35,35 @@ RawFeedClient::RawFeedClient(const Subscription& subscription, const OnRawFeedMe
             [this, subscription](const ix::WebSocketMessagePtr& msg)
             {
                 if (msg->type == ix::WebSocketMessageType::Open) {
+                    spdlog::info("Connected to BitMEX exchange");
+
+                    rapidjson::Document d;
+                    rapidjson::Pointer("/type").Set(d, "subscribe");
+
+                    int i = 0;
+                    const std::list<Channel> &channels = subscription.get_channels();
+                    for (auto channel_iter = channels.begin(); channel_iter != channels.end(); i++, channel_iter++) {
+                        auto channel = *channel_iter;
+                        auto channel_json_ptr = fmt::format("/channels/{0}/name", i);
+                        rapidjson::Pointer(channel_json_ptr.c_str()).Set(d, channel.get_name().c_str());
+
+                        int j = 0;
+                        auto ccy_pair_opt = channel.get_ccy_pair();
+                        if (ccy_pair_opt) {
+                            auto ccy_pair = ccy_pair_opt.value();
+                            auto id_json_ptr = fmt::format("/channels/{0}/product_ids/0", i, j);
+                            auto ccy_pair_txt = fmt::format("{0}-{1}", ccy_pair.get_quote_ccy().get_ccy_code(),
+                                                            ccy_pair.get_base_ccy().get_ccy_code());
+                            rapidjson::Pointer(id_json_ptr.c_str()).Set(d, ccy_pair_txt.c_str());
+                        }
+                    }
+
                     std::stringstream ss;
-                    ss << subscription;
-                    spdlog::info("Connected to Coinbase Pro; subscribing: {}", ss.str().c_str());
+                    rapidjson::OStreamWrapper osw(ss);
+                    rapidjson::Writer<rapidjson::OStreamWrapper> writer(osw);
+                    d.Accept(writer);
+
+                    spdlog::info("Subscribing to channel: {}", ss.str().c_str());
                     this->websocket_->send(ss.str());
                 } else if (msg->type == ix::WebSocketMessageType::Close) {
                     spdlog::info("Connection to Coinbase Pro closed");

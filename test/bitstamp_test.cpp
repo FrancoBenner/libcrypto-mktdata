@@ -10,11 +10,13 @@
 using namespace std::chrono_literals;
 using namespace cloudwall::bitstamp::marketdata;
 
+using cloudwall::core::marketdata::Channel;
+
 TEST(BitstampRawFeedClient, connect) {
-    auto product = ProductId(Currency("BTC"),Currency("USD"));
+    auto ccy_pair = CurrencyPair(Currency("BTC"), Currency("USD"));
     std::list<Channel> channels ({
-        Channel("live_trades", product),
-        Channel("live_orders", product)
+        Channel("live_trades", ccy_pair),
+        Channel("live_orders", ccy_pair)
     });
     auto sub = Subscription(channels);
     int counter = 0;

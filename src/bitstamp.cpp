@@ -13,28 +13,13 @@
 // limitations under the License.
 
 #include <iostream>
-#include <sstream>
 
 #include <boost/algorithm/string.hpp>
 
 #include <cloudwall/crypto-mktdata/bitstamp.h>
 
 using namespace cloudwall::bitstamp::marketdata;
-
-std::ostream& cloudwall::bitstamp::marketdata::operator << (std::ostream& out, const ProductId& product_id) {
-    out << product_id.get_quote_ccy() << product_id.get_base_ccy();
-    return out;
-}
-
-std::ostream& cloudwall::bitstamp::marketdata::operator << (std::ostream& out, const Currency& ccy) {
-    out << boost::algorithm::to_lower_copy(ccy.get_ccy_code());
-    return out;
-}
-
-Channel::Channel(const std::string &name, const std::experimental::optional<ProductId> &product_id)
-        : name_(name), product_id_(product_id) { }
-
-Subscription::Subscription(const std::list<Channel>& channels): channels_(channels) { }
+using cloudwall::core::marketdata::Channel;
 
 RawFeedClient::RawFeedClient(const Subscription& subscription, const OnRawFeedMessageCallback& callback)
         : callback_(callback) {
@@ -52,6 +37,8 @@ RawFeedClient::RawFeedClient(const Subscription& subscription, const OnRawFeedMe
             [this, subscription](const ix::WebSocketMessagePtr& msg)
             {
                 if (msg->type == ix::WebSocketMessageType::Open) {
+                    spdlog::info("Connected to Bitstamp exchange");
+
                     int i = 0;
                     const std::list<Channel> &channels = subscription.get_channels();
                     for (auto channel_iter = channels.begin(); channel_iter != channels.end(); i++, channel_iter++) {
@@ -62,15 +49,15 @@ RawFeedClient::RawFeedClient(const Subscription& subscription, const OnRawFeedMe
                         rapidjson::Pointer("/event").Set(d, "bts:subscribe");
 
                         auto channel = (*channel_iter).get_name();
-                        auto product_id_opt = (*channel_iter).get_product_id();
+                        auto ccy_pair_opt = (*channel_iter).get_ccy_pair();
                         auto arg_json_ptr = "/data/channel";
 
-                        if (product_id_opt) {
-                            auto product_id = product_id_opt.value();
-                            auto quote_ccy = boost::algorithm::to_lower_copy(product_id.get_quote_ccy().get_ccy_code());
-                            auto base_ccy = boost::algorithm::to_lower_copy(product_id.get_base_ccy().get_ccy_code());
-                            auto product_id_txt = fmt::format("{0}_{1}{2}", channel, quote_ccy, base_ccy);
-                            rapidjson::Pointer(arg_json_ptr).Set(d, product_id_txt.c_str());
+                        if (ccy_pair_opt) {
+                            auto ccy_pair = ccy_pair_opt.value();
+                            auto quote_ccy = boost::algorithm::to_lower_copy(ccy_pair.get_quote_ccy().get_ccy_code());
+                            auto base_ccy = boost::algorithm::to_lower_copy(ccy_pair.get_base_ccy().get_ccy_code());
+                            auto ccy_pair_txt = fmt::format("{0}_{1}{2}", channel, quote_ccy, base_ccy);
+                            rapidjson::Pointer(arg_json_ptr).Set(d, ccy_pair_txt.c_str());
                         } else {
                             rapidjson::Pointer(arg_json_ptr).Set(d, channel.c_str());
                         }

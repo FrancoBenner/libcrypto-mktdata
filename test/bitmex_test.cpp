@@ -10,13 +10,15 @@
 using namespace std::chrono_literals;
 using namespace cloudwall::bitmex::marketdata;
 
+using cloudwall::core::marketdata::Channel;
+
 TEST(BitMexRawFeedClient, connect) {
-    auto product = ProductId(Currency("XBT"),Currency("USD"));
-    std::list<Topic> topics ({
-        Topic("instrument"),
-        Topic("trade", product)
+    auto ccy_pair = CurrencyPair(Currency("XBT"), Currency("USD"));
+    std::list<Channel> channels ({
+        Channel("instrument"),
+        Channel("trade", ccy_pair)
     });
-    auto sub = Subscription(topics);
+    auto sub = Subscription(channels);
     int counter = 0;
     int* msg_count = &counter;
     const OnRawFeedMessageCallback& callback = [msg_count](const RawFeedMessage& msg) {

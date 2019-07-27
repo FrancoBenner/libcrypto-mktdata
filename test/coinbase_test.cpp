@@ -10,14 +10,14 @@
 using namespace std::chrono_literals;
 using namespace cloudwall::coinbase::marketdata;
 
+using cloudwall::core::marketdata::Channel;
+
 TEST(CoinbaseProRawFeedClient, connect) {
-    std::list<ProductId> products({
-        ProductId(Currency("BTC"),Currency("USD"))
-    });
+    auto ccy_pair = CurrencyPair(Currency("BTC"), Currency("USD"));
     std::list<Channel> channels({
         Channel("status", { }),
-        Channel("heartbeat", products),
-        Channel("matches", products)
+        Channel("heartbeat", ccy_pair),
+        Channel("matches", ccy_pair)
     });
     auto sub = Subscription(channels);
     int counter = 0;

@@ -28,45 +28,16 @@
 #include <cloudwall/crypto-mktdata/core.h>
 
 using cloudwall::core::marketdata::Currency;
-using cloudwall::core::marketdata::ProductId;
+using cloudwall::core::marketdata::CurrencyPair;
 using cloudwall::core::marketdata::OnRawFeedMessageCallback;
 using cloudwall::core::marketdata::RawFeedMessage;
+using cloudwall::core::marketdata::Subscription;
 
 /// @brief Bitstamp websocket API v2
 /// @see https://www.bitstamp.net/websocket/v2/
 namespace cloudwall::bitstamp::marketdata {
     std::ostream& operator << (std::ostream& out, const Currency& ccy);
-    std::ostream& operator << (std::ostream& out, const ProductId& product_id);
-
-    class Channel {
-    public:
-        explicit Channel(const std::string& name,
-                const std::experimental::optional<ProductId>& product_id = std::experimental::nullopt);
-
-        [[nodiscard]] const std::string& get_name() const {
-            return name_;
-        }
-
-        [[nodiscard]] const std::experimental::optional<ProductId>& get_product_id() const {
-            return product_id_;
-        }
-    private:
-        const std::string& name_;
-        const std::experimental::optional<ProductId>& product_id_;
-    };
-
-    class Subscription {
-    public:
-        explicit Subscription(const std::list<Channel>& channels);
-
-        [[nodiscard]] const std::list<Channel>& get_channels() const {
-            return channels_;
-        }
-
-        ~Subscription() = default;
-    private:
-        const std::list<Channel>& channels_;
-    };
+    std::ostream& operator << (std::ostream& out, const CurrencyPair& ccy_pair);
 
     class RawFeedClient {
     public:

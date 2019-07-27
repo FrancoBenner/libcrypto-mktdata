@@ -28,47 +28,16 @@
 #include <cloudwall/crypto-mktdata/core.h>
 
 using cloudwall::core::marketdata::Currency;
-using cloudwall::core::marketdata::ProductId;
+using cloudwall::core::marketdata::CurrencyPair;
 using cloudwall::core::marketdata::OnRawFeedMessageCallback;
 using cloudwall::core::marketdata::RawFeedMessage;
+using cloudwall::core::marketdata::Subscription;
 
 /// @brief BitMEX websocket API
 /// @see https://www.bitmex.com/app/wsAPI
 namespace cloudwall::bitmex::marketdata {
     std::ostream& operator << (std::ostream& out, const Currency& ccy);
-    std::ostream& operator << (std::ostream& out, const ProductId& product_id);
-
-    class Topic {
-    public:
-        explicit Topic(const std::string& name,
-                const std::experimental::optional<ProductId>& product_id = std::experimental::nullopt);
-
-        [[nodiscard]] const std::string& get_name() const {
-            return name_;
-        }
-
-        [[nodiscard]] const std::experimental::optional<ProductId>& get_product_id() const {
-            return product_id_;
-        }
-    private:
-        const std::string& name_;
-        const std::experimental::optional<ProductId>& product_id_;
-    };
-
-    class Subscription {
-    public:
-        explicit Subscription(const std::list<Topic>& topics);
-
-        [[nodiscard]] const std::list<Topic>& get_topics() const {
-            return topics_;
-        }
-
-        ~Subscription() = default;
-    private:
-        const std::list<Topic>& topics_;
-    };
-
-    std::ostream& operator << (std::ostream& out, const Subscription& subscription);
+    std::ostream& operator << (std::ostream& out, const CurrencyPair& ccy_pair);
 
     class RawFeedClient {
     public:

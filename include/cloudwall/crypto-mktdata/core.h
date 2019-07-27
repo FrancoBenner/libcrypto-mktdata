@@ -15,9 +15,12 @@
 #ifndef CRYPTO_MKTDATA_CORE_H
 #define CRYPTO_MKTDATA_CORE_H
 
+#include <experimental/optional>
+#include <list>
 #include <ostream>
 
 namespace cloudwall::core::marketdata {
+    /// @brief a reference to a cryptocurrency (e.g. BTC) or fiat currency (e.g. USD)
     class Currency {
     public:
         explicit Currency(const std::string &ccy_code);
@@ -36,9 +39,10 @@ namespace cloudwall::core::marketdata {
         const std::string &ccy_code_;
     };
 
-    class ProductId {
+    /// @brief a reference to an exchange-traded currency pair
+    class CurrencyPair {
     public:
-        ProductId(const Currency& quote_ccy, const Currency& base_ccy);
+        CurrencyPair(const Currency& quote_ccy, const Currency& base_ccy);
 
         [[nodiscard]] const Currency& get_base_ccy() const {
             return base_ccy_;
@@ -48,18 +52,51 @@ namespace cloudwall::core::marketdata {
             return quote_ccy_;
         }
 
-        bool operator == (const ProductId &other) const {
+        bool operator == (const CurrencyPair &other) const {
             return (this->get_base_ccy() == other.get_base_ccy())
                    && (this->get_quote_ccy() == other.get_quote_ccy());
         }
 
-        ~ProductId() = default;
+        ~CurrencyPair() = default;
     private:
         const Currency& base_ccy_;
 
         const Currency& quote_ccy_;
     };
 
+    /// @brief a channel or topic on the exchange feed that you can subscribe to, optionally qualified by currency pair
+    class Channel {
+    public:
+        explicit Channel(const std::string& name,
+                         const std::experimental::optional<CurrencyPair>& product_id = std::experimental::nullopt);
+
+        [[nodiscard]] const std::string& get_name() const {
+            return name_;
+        }
+
+        [[nodiscard]] const std::experimental::optional<CurrencyPair>& get_ccy_pair() const {
+            return ccy_pair_;
+        }
+    private:
+        const std::string& name_;
+        const std::experimental::optional<CurrencyPair>& ccy_pair_;
+    };
+
+    /// @brief a composite subscription to one or more channels
+    class Subscription {
+    public:
+        explicit Subscription(const std::list<Channel>& channels);
+
+        [[nodiscard]] const std::list<Channel>& get_channels() const {
+            return channels_;
+        }
+
+        ~Subscription() = default;
+    private:
+        const std::list<Channel>& channels_;
+    };
+
+    /// @brief wrapper around a raw Websocket feed message, typically in JSON
     class RawFeedMessage {
     public:
         explicit RawFeedMessage(const std::string& raw_json);
@@ -73,6 +110,7 @@ namespace cloudwall::core::marketdata {
         const std::string& raw_json_;
     };
 
+    /// @brief callback function made every time a new message is received on a websocket channel
     using OnRawFeedMessageCallback = std::function<void(const RawFeedMessage&)>;
 }
 

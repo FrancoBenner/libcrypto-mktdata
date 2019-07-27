@@ -26,46 +26,16 @@
 #include <cloudwall/crypto-mktdata/core.h>
 
 using cloudwall::core::marketdata::Currency;
-using cloudwall::core::marketdata::ProductId;
+using cloudwall::core::marketdata::CurrencyPair;
 using cloudwall::core::marketdata::OnRawFeedMessageCallback;
 using cloudwall::core::marketdata::RawFeedMessage;
+using cloudwall::core::marketdata::Subscription;
 
 /// @brief Coinbase Pro websocket API
 /// @see https://docs.pro.coinbase.com/
 namespace cloudwall::coinbase::marketdata {
     std::ostream& operator << (std::ostream& out, const Currency& ccy);
-    std::ostream& operator << (std::ostream& out, const ProductId& product_id);
-
-    class Channel {
-    public:
-        Channel(const std::string& name, const std::list<ProductId>& product_ids);
-
-        [[nodiscard]] const std::string& get_name() const {
-            return name_;
-        }
-
-        [[nodiscard]] const std::list<ProductId>& get_product_ids() const {
-            return product_ids_;
-        }
-    private:
-        const std::string& name_;
-        const std::list<ProductId>& product_ids_;
-    };
-
-    class Subscription {
-    public:
-        explicit Subscription(const std::list<Channel>& channels);
-
-        [[nodiscard]] const std::list<Channel>& get_channels() const {
-            return channels_;
-        }
-
-        ~Subscription() = default;
-    private:
-        const std::list<Channel>& channels_;
-    };
-
-    std::ostream& operator << (std::ostream& out, const Subscription& subscription);
+    std::ostream& operator << (std::ostream& out, const CurrencyPair& ccy_pair);
 
     class RawFeedClient {
     public:

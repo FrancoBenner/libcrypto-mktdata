@@ -24,8 +24,8 @@ TEST(ProductId, init) {
     Currency ccy1 = Currency("BTC");
     Currency ccy2 = Currency("ETH");
     Currency ccy3 = Currency("USD");
-    ProductId p1 = ProductId(ccy1, ccy3);
-    ProductId p2 = ProductId(ccy2, ccy3);
+    CurrencyPair p1 = CurrencyPair(ccy1, ccy3);
+    CurrencyPair p2 = CurrencyPair(ccy2, ccy3);
 
     ASSERT_EQ("BTC", p1.get_quote_ccy().get_ccy_code());
     ASSERT_EQ("ETH", p2.get_quote_ccy().get_ccy_code());

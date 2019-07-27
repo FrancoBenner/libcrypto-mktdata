@@ -23,7 +23,6 @@ find_package(ZLIB REQUIRED)
 
 include_directories(include ${LIBIXWEBSOCKETS_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR})
 set(LIBS ${LIBS} ${CONAN_LIBS} ${LIBIXWEBSOCKETS_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES})
-message(${CONAN_LIBS_BOOST})
 list(REMOVE_ITEM LIBS boost_unit_test_framework)
 
 add_library(libcrypto-mktdata src/core.cpp include/cloudwall/crypto-mktdata/core.h
