@@ -15,10 +15,21 @@
 #ifndef CRYPTO_MKTDATA_BINANCE_H
 #define CRYPTO_MKTDATA_BINANCE_H
 
+#include <cloudwall/crypto-mktdata/core.h>
+
+using cloudwall::core::marketdata::OnRawFeedMessageCallback;
+using cloudwall::core::marketdata::RawFeedClient;
+using cloudwall::core::marketdata::Subscription;
+
 /// @brief Binance websocket API
 /// @see https://github.com/binance-exchange/binance-official-api-docs/blob/master/web-socket-streams.md
 namespace cloudwall::binance::marketdata {
+    class BinanceRawFeedClient : public RawFeedClient {
+    public:
+        BinanceRawFeedClient(const Subscription& subscription, const OnRawFeedMessageCallback& callback);
 
+        ~BinanceRawFeedClient() = default;
+    };
 }
 
 #endif //CRYPTO_MKTDATA_BINANCE_H
