@@ -1,44 +1,42 @@
-#include <cloudwall/crypto-mktdata/coinbase.h>
+#include <cloudwall/crypto-mktdata/bitmex.h>
 #include <iostream>
 #include <sstream>
 
-using namespace cloudwall::coinbase::marketdata;
+using namespace cloudwall::bitmex::marketdata;
 
-std::ostream& cloudwall::coinbase::marketdata::operator << (std::ostream& out, const ProductId& product_id) {
-    out << product_id.get_quote_ccy() << "-" << product_id.get_base_ccy();
+std::ostream& cloudwall::bitmex::marketdata::operator << (std::ostream& out, const ProductId& product_id) {
+    out << product_id.get_quote_ccy() << product_id.get_base_ccy();
     return out;
 }
 
-std::ostream& cloudwall::coinbase::marketdata::operator << (std::ostream& out, const Currency& ccy) {
+std::ostream& cloudwall::bitmex::marketdata::operator << (std::ostream& out, const Currency& ccy) {
     out << ccy.get_ccy_code();
     return out;
 }
 
-Channel::Channel(const std::string &name, const std::list<ProductId> &product_ids)
-    : name_(name), product_ids_(product_ids) { }
+Topic::Topic(const std::string &name, const std::experimental::optional<ProductId> &product_id)
+    : name_(name), product_id_(product_id) { }
 
-Subscription::Subscription(const std::list<Channel>& channels)
-    : channels_(channels) { }
+Subscription::Subscription(const std::list<Topic>& topics): topics_(topics) { }
 
-std::ostream& cloudwall::coinbase::marketdata::operator << (std::ostream& out, const Subscription& subscription) {
+std::ostream& cloudwall::bitmex::marketdata::operator << (std::ostream& out, const Subscription& subscription) {
     rapidjson::Document d;
-    rapidjson::Pointer("/type").Set(d, "subscribe");
+    rapidjson::Pointer("/op").Set(d, "subscribe");
 
     int i = 0;
-    const std::list<Channel> &channels = subscription.get_channels();
-    for (auto channel_iter = channels.begin(); channel_iter != channels.end(); i++, channel_iter++) {
-        auto channel = *channel_iter;
-        auto channel_json_ptr = fmt::format("/channels/{0}/name", i);
-        rapidjson::Pointer(channel_json_ptr.c_str()).Set(d, channel.get_name().c_str());
+    const std::list<Topic> &topics = subscription.get_topics();
+    for (auto topic_iter = topics.begin(); topic_iter != topics.end(); i++, topic_iter++) {
+        auto topic = (*topic_iter).get_name();
+        auto product_id_opt = (*topic_iter).get_product_id();
+        auto arg_json_ptr = fmt::format("/args/{0}", i);
 
-        int j = 0;
-        const std::list<ProductId> &product_ids = channel.get_product_ids();
-        for (auto product_id_iter = product_ids.begin(); product_id_iter != product_ids.end(); j++, product_id_iter++) {
-            auto product_id = *product_id_iter;
-            auto id_json_ptr = fmt::format("/channels/{0}/product_ids/{1}", i, j);
-            auto product_id_txt = fmt::format("{0}-{1}", product_id.get_quote_ccy().get_ccy_code(),
-                    product_id.get_base_ccy().get_ccy_code());
-            rapidjson::Pointer(id_json_ptr.c_str()).Set(d, product_id_txt.c_str());
+        if (product_id_opt) {
+            auto product_id = product_id_opt.value();
+            auto product_id_txt = fmt::format("{0}:{1}{2}", topic, product_id.get_quote_ccy().get_ccy_code(),
+                                              product_id.get_base_ccy().get_ccy_code());
+            rapidjson::Pointer(arg_json_ptr.c_str()).Set(d, product_id_txt.c_str());
+        } else {
+            rapidjson::Pointer(arg_json_ptr.c_str()).Set(d, topic.c_str());
         }
     }
 
@@ -52,7 +50,7 @@ RawFeedClient::RawFeedClient(const Subscription& subscription, const OnRawFeedMe
         : callback_(callback) {
     this->websocket_ = new ix::WebSocket();
 
-    std::string url("wss://ws-feed.pro.coinbase.com/");
+    std::string url("wss://www.bitmex.com/realtime/");
     websocket_->setUrl(url);
 
     // Optional heart beat, sent every 45 seconds when there is not any traffic
@@ -64,13 +62,13 @@ RawFeedClient::RawFeedClient(const Subscription& subscription, const OnRawFeedMe
             [this, subscription](const ix::WebSocketMessagePtr& msg)
             {
                 if (msg->type == ix::WebSocketMessageType::Open) {
-                    // start subscription to heartbeat channel
+                    // start subscription to heartbeat topic
                     std::stringstream ss;
                     ss << subscription;
-                    spdlog::info("Connected to Coinbase Pro; subscribing: {}", ss.str().c_str());
+                    spdlog::info("Connected to BitMEX; subscribing: {}", ss.str().c_str());
                     this->websocket_->send(ss.str());
                 } else if (msg->type == ix::WebSocketMessageType::Close) {
-                    spdlog::info("Connection to Coinbase Pro closed");
+                    spdlog::info("Connection to BitMEX closed");
                 } else if (msg->type == ix::WebSocketMessageType::Message) {
                     SPDLOG_TRACE("Incoming message: {}", msg->str.c_str());
                     callback_(RawFeedMessage(msg->str));
@@ -98,4 +96,3 @@ void RawFeedClient::disconnect() {
 RawFeedClient::~RawFeedClient() {
     delete this->websocket_;
 }
-

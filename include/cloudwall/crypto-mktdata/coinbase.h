@@ -26,32 +26,14 @@
 #include <cloudwall/crypto-mktdata/core.h>
 
 using cloudwall::core::marketdata::Currency;
+using cloudwall::core::marketdata::ProductId;
+using cloudwall::core::marketdata::OnRawFeedMessageCallback;
+using cloudwall::core::marketdata::RawFeedMessage;
 
+/// @brief Coinbase Pro websocket API
+/// @see https://docs.pro.coinbase.com/
 namespace cloudwall::coinbase::marketdata {
-    class ProductId {
-    public:
-        ProductId(const Currency& quote_ccy, const Currency& base_ccy);
-
-        [[nodiscard]] const Currency& get_base_ccy() const {
-            return base_ccy_;
-        }
-
-        [[nodiscard]] const Currency& get_quote_ccy() const {
-            return quote_ccy_;
-        }
-
-        bool operator == (const ProductId &other) const {
-            return (this->get_base_ccy() == other.get_base_ccy())
-                && (this->get_quote_ccy() == other.get_quote_ccy());
-        }
-
-        ~ProductId() = default;
-    private:
-        const Currency& base_ccy_;
-
-        const Currency& quote_ccy_;
-    };
-
+    std::ostream& operator << (std::ostream& out, const Currency& ccy);
     std::ostream& operator << (std::ostream& out, const ProductId& product_id);
 
     class Channel {
@@ -85,24 +67,9 @@ namespace cloudwall::coinbase::marketdata {
 
     std::ostream& operator << (std::ostream& out, const Subscription& subscription);
 
-    class RawFeedMessage {
-    public:
-        explicit RawFeedMessage(const std::string& raw_json);
-
-        [[nodiscard]] const std::string& get_raw_json() const {
-            return raw_json_;
-        }
-
-        ~RawFeedMessage();
-    private:
-        const std::string& raw_json_;
-    };
-
-    using OnMessageCallback = std::function<void(const RawFeedMessage&)>;
-
     class RawFeedClient {
     public:
-        RawFeedClient(const Subscription& subscription, const OnMessageCallback& callback);
+        RawFeedClient(const Subscription& subscription, const OnRawFeedMessageCallback& callback);
 
         void connect();
 
@@ -111,7 +78,7 @@ namespace cloudwall::coinbase::marketdata {
         ~RawFeedClient();
     private:
         ix::WebSocket *websocket_;
-        const OnMessageCallback& callback_;
+        const OnRawFeedMessageCallback& callback_;
     };
 }
 

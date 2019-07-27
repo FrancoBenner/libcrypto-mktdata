@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(coinbase C CXX)
+project(libcrypto-mktdata C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -24,8 +24,9 @@ include_directories(include ${LIBIXWEBSOCKETS_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR
 set(LIBS ${LIBS} ${CONAN_LIBS} ${LIBIXWEBSOCKETS_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES})
 
 add_library(libcrypto-mktdata src/core.cpp include/cloudwall/crypto-mktdata/core.h
-        src/coinbase.cpp include/cloudwall/crypto-mktdata/coinbase.h)
+        src/coinbase.cpp include/cloudwall/crypto-mktdata/coinbase.h src/bitmex.cpp
+        include/cloudwall/crypto-mktdata/bitmex.h)
 
-add_executable(libcrypto-mktdata_test test/coinbase_test.cpp)
+add_executable(libcrypto-mktdata_test test/core_test.cpp test/coinbase_test.cpp test/bitmex_test.cpp)
 target_link_libraries(libcrypto-mktdata_test libcrypto-mktdata ${LIBS})
 

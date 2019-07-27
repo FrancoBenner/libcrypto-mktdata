@@ -5,21 +5,18 @@
 #include <thread>
 
 #include <gtest/gtest.h>
-#include <cloudwall/crypto-mktdata/coinbase.h>
+#include <cloudwall/crypto-mktdata/bitmex.h>
 
 using namespace std::chrono_literals;
-using namespace cloudwall::coinbase::marketdata;
+using namespace cloudwall::bitmex::marketdata;
 
-TEST(CoinbaseProRawFeedClient, connect) {
-    std::list<ProductId> products({
-        ProductId(Currency("BTC"),Currency("USD"))
+TEST(BitMexRawFeedClient, connect) {
+    auto product = ProductId(Currency("XBT"),Currency("USD"));
+    std::list<Topic> topics ({
+        Topic("instrument"),
+        Topic("trade", product)
     });
-    std::list<Channel> channels({
-        Channel("status", { }),
-        Channel("heartbeat", products),
-        Channel("matches", products)
-    });
-    auto sub = Subscription(channels);
+    auto sub = Subscription(topics);
     int counter = 0;
     int* msg_count = &counter;
     const OnRawFeedMessageCallback& callback = [msg_count](const RawFeedMessage& msg) {

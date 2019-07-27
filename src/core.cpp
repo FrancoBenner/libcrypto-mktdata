@@ -6,7 +6,10 @@ using namespace cloudwall::core::marketdata;
 
 Currency::Currency(const std::string& ccy_code) : ccy_code_(ccy_code) {}
 
-std::ostream& cloudwall::core::marketdata::operator << (std::ostream& out, const Currency& ccy) {
-    out << ccy.get_ccy_code();
-    return out;
+ProductId::ProductId(const Currency& quote_ccy, const Currency& base_ccy)
+        : base_ccy_(base_ccy), quote_ccy_(quote_ccy) { }
+
+RawFeedMessage::RawFeedMessage(const std::string &raw_json) : raw_json_(raw_json) {
 }
+
+RawFeedMessage::~RawFeedMessage() = default;

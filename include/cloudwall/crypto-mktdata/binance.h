@@ -15,4 +15,10 @@
 #ifndef CRYPTO_MKTDATA_BINANCE_H
 #define CRYPTO_MKTDATA_BINANCE_H
 
+/// @brief Binance websocket API
+/// @see https://github.com/binance-exchange/binance-official-api-docs/blob/master/web-socket-streams.md
+namespace cloudwall::binance::marketdata {
+
+}
+
 #endif //CRYPTO_MKTDATA_BINANCE_H

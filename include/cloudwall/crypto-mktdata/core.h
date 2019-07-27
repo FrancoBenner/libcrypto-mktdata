@@ -20,9 +20,9 @@
 namespace cloudwall::core::marketdata {
     class Currency {
     public:
-        Currency(const std::string &ccy_code);
+        explicit Currency(const std::string &ccy_code);
 
-        const std::string &get_ccy_code() const {
+        [[nodiscard]] const std::string &get_ccy_code() const {
             return ccy_code_;
         }
 
@@ -36,7 +36,44 @@ namespace cloudwall::core::marketdata {
         const std::string &ccy_code_;
     };
 
-    std::ostream &operator<<(std::ostream &out, const Currency &ccy);
+    class ProductId {
+    public:
+        ProductId(const Currency& quote_ccy, const Currency& base_ccy);
+
+        [[nodiscard]] const Currency& get_base_ccy() const {
+            return base_ccy_;
+        }
+
+        [[nodiscard]] const Currency& get_quote_ccy() const {
+            return quote_ccy_;
+        }
+
+        bool operator == (const ProductId &other) const {
+            return (this->get_base_ccy() == other.get_base_ccy())
+                   && (this->get_quote_ccy() == other.get_quote_ccy());
+        }
+
+        ~ProductId() = default;
+    private:
+        const Currency& base_ccy_;
+
+        const Currency& quote_ccy_;
+    };
+
+    class RawFeedMessage {
+    public:
+        explicit RawFeedMessage(const std::string& raw_json);
+
+        [[nodiscard]] const std::string& get_raw_json() const {
+            return raw_json_;
+        }
+
+        ~RawFeedMessage();
+    private:
+        const std::string& raw_json_;
+    };
+
+    using OnRawFeedMessageCallback = std::function<void(const RawFeedMessage&)>;
 }
 
 #endif //CRYPTO_MKTDATA_CORE_H
