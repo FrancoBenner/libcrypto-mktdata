@@ -43,16 +43,16 @@ KrakenRawFeedClient::KrakenRawFeedClient(const Subscription& subscription,
                         rapidjson::Document d;
                         rapidjson::Pointer("/event").Set(d, "subscribe");
 
-                        auto channel_json_ptr = "/subscription/name";
-                        rapidjson::Pointer(channel_json_ptr).Set(d, channel.get_name().c_str());
+                        auto name_json_ptr = "/subscription/name";
+                        rapidjson::Pointer(name_json_ptr).Set(d, channel.get_name().c_str());
 
                         auto ccy_pair_opt = channel.get_ccy_pair();
                         if (ccy_pair_opt) {
                             auto ccy_pair = ccy_pair_opt.value();
-                            auto id_json_ptr = "/pair/0";
+                            auto pair_json_ptr = "/pair/0";
                             auto ccy_pair_txt = fmt::format("{0}/{1}", ccy_pair.get_quote_ccy().get_ccy_code(),
                                                             ccy_pair.get_base_ccy().get_ccy_code());
-                            rapidjson::Pointer(id_json_ptr).Set(d, ccy_pair_txt.c_str());
+                            rapidjson::Pointer(pair_json_ptr).Set(d, ccy_pair_txt.c_str());
                         }
 
                         std::stringstream ss;

@@ -16,16 +16,16 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include <cloudwall/crypto-mktdata/bitstamp.h>
+#include <cloudwall/crypto-mktdata/bitfinex.h>
 
-using namespace cloudwall::bitstamp::marketdata;
+using namespace cloudwall::bitfinex::marketdata;
 
 using cloudwall::core::marketdata::Channel;
 using cloudwall::core::marketdata::RawFeedMessage;
 
-BitstampRawFeedClient::BitstampRawFeedClient(const Subscription& subscription, const OnRawFeedMessageCallback& callback)
+BitfinexRawFeedClient::BitfinexRawFeedClient(const Subscription& subscription, const OnRawFeedMessageCallback& callback)
         : RawFeedClient(new ix::WebSocket(), callback) {
-    std::string url("wss://ws.bitstamp.net/");
+    std::string url("wss://api-pub.bitfinex.com/ws/2");
     websocket_->setUrl(url);
 
     // Optional heart beat, sent every 45 seconds when there is not any traffic
@@ -37,7 +37,7 @@ BitstampRawFeedClient::BitstampRawFeedClient(const Subscription& subscription, c
             [this, subscription](const ix::WebSocketMessagePtr& msg)
             {
                 if (msg->type == ix::WebSocketMessageType::Open) {
-                    spdlog::info("Connected to Bitstamp exchange");
+                    spdlog::info("Connected to Bitfinex exchange");
 
                     const std::list<Channel> &channels = subscription.get_channels();
                     for (auto channel_iter : channels) {
@@ -45,20 +45,20 @@ BitstampRawFeedClient::BitstampRawFeedClient(const Subscription& subscription, c
                         rapidjson::OStreamWrapper osw(ss);
 
                         rapidjson::Document d;
-                        rapidjson::Pointer("/event").Set(d, "bts:subscribe");
+                        rapidjson::Pointer("/event").Set(d, "subscribe");
 
                         const std::string &channel = channel_iter.get_name();
-                        auto channel_json_ptr = "/data/channel";
+                        auto channel_json_ptr = "/channel";
+                        rapidjson::Pointer(channel_json_ptr).Set(d, channel.c_str());
 
                         auto ccy_pair_opt = channel_iter.get_ccy_pair();
                         if (ccy_pair_opt) {
                             auto ccy_pair = ccy_pair_opt.value();
-                            auto quote_ccy = boost::algorithm::to_lower_copy(ccy_pair.get_quote_ccy().get_ccy_code());
-                            auto base_ccy = boost::algorithm::to_lower_copy(ccy_pair.get_base_ccy().get_ccy_code());
-                            auto ccy_pair_txt = fmt::format("{0}_{1}{2}", channel, quote_ccy, base_ccy);
-                            rapidjson::Pointer(channel_json_ptr).Set(d, ccy_pair_txt.c_str());
-                        } else {
-                            rapidjson::Pointer(channel_json_ptr).Set(d, channel.c_str());
+                            auto quote_ccy = ccy_pair.get_quote_ccy().get_ccy_code();
+                            auto base_ccy = ccy_pair.get_base_ccy().get_ccy_code();
+                            auto ccy_pair_txt = fmt::format("t{1}{2}", channel, quote_ccy, base_ccy);
+                            auto sym_json_ptr = "/symbol";
+                            rapidjson::Pointer(sym_json_ptr).Set(d, ccy_pair_txt.c_str());
                         }
 
                         rapidjson::Writer<rapidjson::OStreamWrapper> writer(osw);
@@ -68,9 +68,9 @@ BitstampRawFeedClient::BitstampRawFeedClient(const Subscription& subscription, c
                         this->websocket_->send(ss.str());
                     }
                 } else if (msg->type == ix::WebSocketMessageType::Close) {
-                    spdlog::info("Connection to Bitstamp closed");
+                    spdlog::info("Connection to Bitfinex closed");
                 } else if (msg->type == ix::WebSocketMessageType::Message) {
-                    SPDLOG_TRACE("Incoming message from Bitstamp: {}", msg->str.c_str());
+                    SPDLOG_TRACE("Incoming message from Bitfinex: {}", msg->str.c_str());
                     callback_(RawFeedMessage(msg->str));
                 } else if (msg->type == ix::WebSocketMessageType::Error) {
                     std::stringstream ss;

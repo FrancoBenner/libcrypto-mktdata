@@ -19,22 +19,21 @@
 #include <thread>
 
 #include <gtest/gtest.h>
-#include <cloudwall/crypto-mktdata/kraken.h>
+#include <cloudwall/crypto-mktdata/bitfinex.h>
 
 using namespace std::chrono_literals;
 
-using cloudwall::kraken::marketdata::KrakenRawFeedClient;
+using cloudwall::bitfinex::marketdata::BitfinexRawFeedClient;
 using cloudwall::core::marketdata::Channel;
 using cloudwall::core::marketdata::Currency;
 using cloudwall::core::marketdata::CurrencyPair;
 using cloudwall::core::marketdata::RawFeedMessage;
 
-TEST(KrakenRawFeedClient, connect) {
-    auto ccy_pair = CurrencyPair(Currency("XBT"), Currency("USD"));
-    std::list<Channel> channels({
-        Channel("trade", ccy_pair),
-        Channel("spread", ccy_pair),
-
+TEST(BitfinexRawFeedClient, connect) {
+    auto ccy_pair = CurrencyPair(Currency("BTC"), Currency("USD"));
+    std::list<Channel> channels ({
+        Channel("trades", ccy_pair),
+        Channel("ticker", ccy_pair)
     });
     auto sub = Subscription(channels);
     int counter = 0;
@@ -44,7 +43,7 @@ TEST(KrakenRawFeedClient, connect) {
         spdlog::info("Incoming message: {}", msg.get_raw_json());
         ASSERT_FALSE(msg.get_raw_json().empty());
     };
-    auto client = KrakenRawFeedClient(sub, callback);
+    auto client = BitfinexRawFeedClient(sub, callback);
     client.connect();
     for (int i = 0; i < 5; i++) {
         std::this_thread::sleep_for(1s);

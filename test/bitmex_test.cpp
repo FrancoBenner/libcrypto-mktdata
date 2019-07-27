@@ -32,9 +32,9 @@ using cloudwall::core::marketdata::RawFeedMessage;
 TEST(BitMexRawFeedClient, connect) {
     auto ccy_pair = CurrencyPair(Currency("XBT"), Currency("USD"));
     std::list<Channel> channels ({
-        Channel("instrument"),
-        Channel("trade", ccy_pair)
-    });
+        Channel("trade", ccy_pair),
+        Channel("quote", ccy_pair)
+                                 });
     auto sub = Subscription(channels);
     int counter = 0;
     int* msg_count = &counter;

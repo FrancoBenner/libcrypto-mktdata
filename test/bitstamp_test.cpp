@@ -33,7 +33,7 @@ TEST(BitstampRawFeedClient, connect) {
     auto ccy_pair = CurrencyPair(Currency("BTC"), Currency("USD"));
     std::list<Channel> channels ({
         Channel("live_trades", ccy_pair),
-        Channel("live_orders", ccy_pair)
+        Channel("live_order_book", ccy_pair)
     });
     auto sub = Subscription(channels);
     int counter = 0;

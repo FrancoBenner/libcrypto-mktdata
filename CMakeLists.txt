@@ -29,9 +29,10 @@ add_library(libcrypto-mktdata src/core.cpp include/cloudwall/crypto-mktdata/core
         src/coinbase.cpp include/cloudwall/crypto-mktdata/coinbase.h src/bitmex.cpp
         include/cloudwall/crypto-mktdata/bitmex.h src/bitstamp.cpp
         include/cloudwall/crypto-mktdata/bitstamp.h src/kraken.cpp
-        include/cloudwall/crypto-mktdata/kraken.h)
+        include/cloudwall/crypto-mktdata/kraken.h src/bitfinex.cpp
+        include/cloudwall/crypto-mktdata/bitfinex.h)
 
 add_executable(libcrypto-mktdata_test test/core_test.cpp test/coinbase_test.cpp test/bitmex_test.cpp
-        test/bitstamp_test.cpp test/kraken_test.cpp)
+        test/bitstamp_test.cpp test/kraken_test.cpp test/bitfinex_test.cpp)
 target_link_libraries(libcrypto-mktdata_test libcrypto-mktdata ${LIBS})
 

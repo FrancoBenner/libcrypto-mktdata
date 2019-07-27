@@ -15,4 +15,21 @@
 #ifndef CRYPTO_MKTDATA_BITFINEX_H
 #define CRYPTO_MKTDATA_BITFINEX_H
 
+#include <cloudwall/crypto-mktdata/core.h>
+
+using cloudwall::core::marketdata::OnRawFeedMessageCallback;
+using cloudwall::core::marketdata::RawFeedClient;
+using cloudwall::core::marketdata::Subscription;
+
+/// @brief BitMEX websocket API
+/// @see https://docs.bitfinex.com/v2/docs/ws-general
+namespace cloudwall::bitfinex::marketdata {
+    class BitfinexRawFeedClient : public RawFeedClient {
+    public:
+        BitfinexRawFeedClient(const Subscription& subscription, const OnRawFeedMessageCallback& callback);
+
+        ~BitfinexRawFeedClient() = default;
+    };
+}
+
 #endif //CRYPTO_MKTDATA_BITFINEX_H
