@@ -21,7 +21,7 @@ using cloudwall::core::marketdata::OnRawFeedMessageCallback;
 using cloudwall::core::marketdata::RawFeedClient;
 using cloudwall::core::marketdata::Subscription;
 
-/// @brief BitMEX websocket API
+/// @brief Bitfinex websocket API
 /// @see https://docs.bitfinex.com/v2/docs/ws-general
 namespace cloudwall::bitfinex::marketdata {
     class BitfinexRawFeedClient : public RawFeedClient {
