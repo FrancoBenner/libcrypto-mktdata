@@ -85,35 +85,30 @@ namespace cloudwall::coinbase::marketdata {
 
     std::ostream& operator << (std::ostream& out, const Subscription& subscription);
 
-    class MarketdataMessage {
+    class RawFeedMessage {
     public:
-        MarketdataMessage(const std::string& type, const rapidjson::Document& document);
+        explicit RawFeedMessage(const std::string& raw_json);
 
-        [[nodiscard]] const std::string& get_type() const {
-            return type_;
+        [[nodiscard]] const std::string& get_raw_json() const {
+            return raw_json_;
         }
 
-        [[nodiscard]] const rapidjson::Document& get_document() const {
-            return document_;
-        }
-
-        ~MarketdataMessage();
+        ~RawFeedMessage();
     private:
-        const std::string& type_;
-        const rapidjson::Document& document_;
+        const std::string& raw_json_;
     };
 
-    using OnMessageCallback = std::function<void(const MarketdataMessage&)>;
+    using OnMessageCallback = std::function<void(const RawFeedMessage&)>;
 
-    class MarketdataClient {
+    class RawFeedClient {
     public:
-        MarketdataClient(const Subscription& subscription, const OnMessageCallback& callback);
+        RawFeedClient(const Subscription& subscription, const OnMessageCallback& callback);
 
         void connect();
 
         void disconnect();
 
-        ~MarketdataClient();
+        ~RawFeedClient();
     private:
         ix::WebSocket *websocket_;
         const OnMessageCallback& callback_;

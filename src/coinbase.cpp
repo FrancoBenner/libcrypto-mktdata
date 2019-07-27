@@ -47,13 +47,12 @@ std::ostream& cloudwall::coinbase::marketdata::operator << (std::ostream& out, c
     return out;
 }
 
-MarketdataMessage::MarketdataMessage(const std::string &type, const rapidjson::Document& document)
-        : type_(type), document_(document) {
+RawFeedMessage::RawFeedMessage(const std::string &raw_json) : raw_json_(raw_json) {
 }
 
-MarketdataMessage::~MarketdataMessage() = default;
+RawFeedMessage::~RawFeedMessage() = default;
 
-MarketdataClient::MarketdataClient(const Subscription& subscription, const OnMessageCallback& callback)
+RawFeedClient::RawFeedClient(const Subscription& subscription, const OnMessageCallback& callback)
         : callback_(callback) {
     this->websocket_ = new ix::WebSocket();
 
@@ -72,13 +71,13 @@ MarketdataClient::MarketdataClient(const Subscription& subscription, const OnMes
                     // start subscription to heartbeat channel
                     std::stringstream ss;
                     ss << subscription;
+                    spdlog::info("Connected to exchange; subscribing: {}", ss.str().c_str());
                     this->websocket_->send(ss.str());
                 } else if (msg->type == ix::WebSocketMessageType::Close) {
                     spdlog::info("Connection closed");
                 } else if (msg->type == ix::WebSocketMessageType::Message) {
-                    rapidjson::Document doc;
-                    doc.Parse(msg->str.c_str());
-                    callback_(MarketdataMessage(doc["type"].GetString(), doc));
+                    SPDLOG_TRACE("Incoming message: {}", msg->str.c_str());
+                    callback_(RawFeedMessage(msg->str));
                 } else if (msg->type == ix::WebSocketMessageType::Error) {
                     std::stringstream ss;
                     ss << "Connection error: " << msg->errorInfo.reason      << std::endl;
@@ -92,15 +91,15 @@ MarketdataClient::MarketdataClient(const Subscription& subscription, const OnMes
             });
 }
 
-void MarketdataClient::connect() {
+void RawFeedClient::connect() {
     this->websocket_->start();
 }
 
-void MarketdataClient::disconnect() {
+void RawFeedClient::disconnect() {
     this->websocket_->stop();
 }
 
-MarketdataClient::~MarketdataClient() {
+RawFeedClient::~RawFeedClient() {
     delete this->websocket_;
 }
 

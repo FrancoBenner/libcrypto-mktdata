@@ -47,12 +47,11 @@ TEST(MarketDataClient, connect) {
     auto sub = Subscription(channels);
     int counter = 0;
     int* msg_count = &counter;
-    const OnMessageCallback& callback = [msg_count](const MarketdataMessage& msg) {
+    const OnMessageCallback& callback = [msg_count](const RawFeedMessage& msg) {
         (*msg_count)++;
-        ASSERT_TRUE(msg.get_type().size() > 0);
-        ASSERT_EQ(msg.get_type(), msg.get_document()["type"].GetString());
+        ASSERT_TRUE(msg.get_raw_json().size() > 0);
     };
-    auto client = MarketdataClient(sub, callback);
+    auto client = RawFeedClient(sub, callback);
     client.connect();
     for (int i = 0; i < 5; i++) {
         std::this_thread::sleep_for(1s);
