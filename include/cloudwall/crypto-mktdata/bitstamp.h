@@ -15,16 +15,6 @@
 #ifndef CRYPTO_MKTDATA_BITSTAMP_H
 #define CRYPTO_MKTDATA_BITSTAMP_H
 
-#include <experimental/optional>
-
-#include <fmt/core.h>
-#include <ixwebsocket/IXWebSocket.h>
-#include <ixwebsocket/IXSocket.h>
-#include <rapidjson/pointer.h>
-#include <rapidjson/ostreamwrapper.h>
-#include <rapidjson/writer.h>
-#include <spdlog/spdlog.h>
-
 #include <cloudwall/crypto-mktdata/core.h>
 
 using cloudwall::core::marketdata::OnRawFeedMessageCallback;

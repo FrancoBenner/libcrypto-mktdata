@@ -12,19 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <cloudwall/crypto-mktdata/bitmex.h>
+#include <cloudwall/crypto-mktdata/kraken.h>
 #include <iostream>
 #include <sstream>
 
-using namespace cloudwall::bitmex::marketdata;
+using namespace cloudwall::kraken::marketdata;
+
 using cloudwall::core::marketdata::Channel;
-using cloudwall::core::marketdata::RawFeedClient;
 using cloudwall::core::marketdata::RawFeedMessage;
 
-BitMexRawFeedClient::BitMexRawFeedClient(const Subscription& subscription, const OnRawFeedMessageCallback& callback)
-        : RawFeedClient(new ix::WebSocket(), callback) {
-
-    std::string url("wss://www.bitmex.com/realtime/");
+KrakenRawFeedClient::KrakenRawFeedClient(const Subscription& subscription,
+                                         const OnRawFeedMessageCallback& callback)
+            : RawFeedClient(new ix::WebSocket(), callback) {
+    std::string url("wss://ws.kraken.com/");
     websocket_->setUrl(url);
 
     // Optional heart beat, sent every 45 seconds when there is not any traffic
@@ -36,39 +36,37 @@ BitMexRawFeedClient::BitMexRawFeedClient(const Subscription& subscription, const
             [this, subscription](const ix::WebSocketMessagePtr& msg)
             {
                 if (msg->type == ix::WebSocketMessageType::Open) {
-                    spdlog::info("Connected to BitMEX exchange");
+                    spdlog::info("Connected to Kraken exchange");
 
-                    rapidjson::Document d;
-                    rapidjson::Pointer("/op").Set(d, "subscribe");
-
-                    int i = 0;
                     const std::list<Channel> &channels = subscription.get_channels();
-                    for (auto channel_iter = channels.begin(); channel_iter != channels.end(); i++, channel_iter++) {
-                        auto topic = (*channel_iter).get_name();
-                        auto ccy_pair_opt = (*channel_iter).get_ccy_pair();
-                        auto arg_json_ptr = fmt::format("/args/{0}", i);
+                    for (auto channel : channels) {
+                        rapidjson::Document d;
+                        rapidjson::Pointer("/event").Set(d, "subscribe");
 
+                        auto channel_json_ptr = "/subscription/name";
+                        rapidjson::Pointer(channel_json_ptr).Set(d, channel.get_name().c_str());
+
+                        auto ccy_pair_opt = channel.get_ccy_pair();
                         if (ccy_pair_opt) {
                             auto ccy_pair = ccy_pair_opt.value();
-                            auto ccy_pair_txt = fmt::format("{0}:{1}{2}", topic, ccy_pair.get_quote_ccy().get_ccy_code(),
+                            auto id_json_ptr = "/pair/0";
+                            auto ccy_pair_txt = fmt::format("{0}/{1}", ccy_pair.get_quote_ccy().get_ccy_code(),
                                                             ccy_pair.get_base_ccy().get_ccy_code());
-                            rapidjson::Pointer(arg_json_ptr.c_str()).Set(d, ccy_pair_txt.c_str());
-                        } else {
-                            rapidjson::Pointer(arg_json_ptr.c_str()).Set(d, topic.c_str());
+                            rapidjson::Pointer(id_json_ptr).Set(d, ccy_pair_txt.c_str());
                         }
+
+                        std::stringstream ss;
+                        rapidjson::OStreamWrapper osw(ss);
+                        rapidjson::Writer<rapidjson::OStreamWrapper> writer(osw);
+                        d.Accept(writer);
+
+                        spdlog::info("Subscribing to channel: {}", ss.str().c_str());
+                        this->websocket_->send(ss.str());
                     }
-
-                    std::stringstream ss;
-                    rapidjson::OStreamWrapper osw(ss);
-                    rapidjson::Writer<rapidjson::OStreamWrapper> writer(osw);
-                    d.Accept(writer);
-
-                    spdlog::info("Subscribing to channel: {}", ss.str().c_str());
-                    this->websocket_->send(ss.str());
                 } else if (msg->type == ix::WebSocketMessageType::Close) {
-                    spdlog::info("Connection to BitMEX closed");
+                    spdlog::info("Connection to Kraken closed");
                 } else if (msg->type == ix::WebSocketMessageType::Message) {
-                    SPDLOG_TRACE("Incoming message from BitMEX: {}", msg->str.c_str());
+                    SPDLOG_TRACE("Incoming message from Kraken: {}", msg->str.c_str());
                     callback_(RawFeedMessage(msg->str));
                 } else if (msg->type == ix::WebSocketMessageType::Error) {
                     std::stringstream ss;

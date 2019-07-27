@@ -19,8 +19,13 @@
 #include <list>
 #include <ostream>
 
+#include <fmt/core.h>
 #include <ixwebsocket/IXWebSocket.h>
 #include <ixwebsocket/IXSocket.h>
+#include <rapidjson/pointer.h>
+#include <rapidjson/ostreamwrapper.h>
+#include <rapidjson/writer.h>
+#include <spdlog/spdlog.h>
 
 namespace cloudwall::core::marketdata {
     /// @brief a reference to a cryptocurrency (e.g. BTC) or fiat currency (e.g. USD)

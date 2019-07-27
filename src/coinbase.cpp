@@ -35,40 +35,37 @@ CoinbaseRawFeedClient::CoinbaseRawFeedClient(const Subscription& subscription,
             [this, subscription](const ix::WebSocketMessagePtr& msg)
             {
                 if (msg->type == ix::WebSocketMessageType::Open) {
-                    spdlog::info("Connected to BitMEX exchange");
+                    spdlog::info("Connected to Coinbase Pro exchange");
 
-                    rapidjson::Document d;
-                    rapidjson::Pointer("/type").Set(d, "subscribe");
-
-                    int i = 0;
                     const std::list<Channel> &channels = subscription.get_channels();
-                    for (auto channel_iter = channels.begin(); channel_iter != channels.end(); i++, channel_iter++) {
-                        auto channel = *channel_iter;
-                        auto channel_json_ptr = fmt::format("/channels/{0}/name", i);
-                        rapidjson::Pointer(channel_json_ptr.c_str()).Set(d, channel.get_name().c_str());
+                    for (auto channel : channels) {
+                        rapidjson::Document d;
+                        rapidjson::Pointer("/type").Set(d, "subscribe");
 
-                        int j = 0;
+                        auto channel_json_ptr = "/channels/0/name";
+                        rapidjson::Pointer(channel_json_ptr).Set(d, channel.get_name().c_str());
+
                         auto ccy_pair_opt = channel.get_ccy_pair();
                         if (ccy_pair_opt) {
                             auto ccy_pair = ccy_pair_opt.value();
-                            auto id_json_ptr = fmt::format("/channels/{0}/product_ids/0", i, j);
+                            auto id_json_ptr = "/channels/0/product_ids/0";
                             auto ccy_pair_txt = fmt::format("{0}-{1}", ccy_pair.get_quote_ccy().get_ccy_code(),
                                                             ccy_pair.get_base_ccy().get_ccy_code());
-                            rapidjson::Pointer(id_json_ptr.c_str()).Set(d, ccy_pair_txt.c_str());
+                            rapidjson::Pointer(id_json_ptr).Set(d, ccy_pair_txt.c_str());
                         }
+
+                        std::stringstream ss;
+                        rapidjson::OStreamWrapper osw(ss);
+                        rapidjson::Writer<rapidjson::OStreamWrapper> writer(osw);
+                        d.Accept(writer);
+
+                        spdlog::info("Subscribing to channel: {}", ss.str().c_str());
+                        this->websocket_->send(ss.str());
                     }
-
-                    std::stringstream ss;
-                    rapidjson::OStreamWrapper osw(ss);
-                    rapidjson::Writer<rapidjson::OStreamWrapper> writer(osw);
-                    d.Accept(writer);
-
-                    spdlog::info("Subscribing to channel: {}", ss.str().c_str());
-                    this->websocket_->send(ss.str());
                 } else if (msg->type == ix::WebSocketMessageType::Close) {
                     spdlog::info("Connection to Coinbase Pro closed");
                 } else if (msg->type == ix::WebSocketMessageType::Message) {
-                    SPDLOG_TRACE("Incoming message: {}", msg->str.c_str());
+                    SPDLOG_TRACE("Incoming message from Coinbase Pro: {}", msg->str.c_str());
                     callback_(RawFeedMessage(msg->str));
                 } else if (msg->type == ix::WebSocketMessageType::Error) {
                     std::stringstream ss;

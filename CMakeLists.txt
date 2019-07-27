@@ -28,9 +28,10 @@ list(REMOVE_ITEM LIBS boost_unit_test_framework)
 add_library(libcrypto-mktdata src/core.cpp include/cloudwall/crypto-mktdata/core.h
         src/coinbase.cpp include/cloudwall/crypto-mktdata/coinbase.h src/bitmex.cpp
         include/cloudwall/crypto-mktdata/bitmex.h src/bitstamp.cpp
-        include/cloudwall/crypto-mktdata/bitstamp.h)
+        include/cloudwall/crypto-mktdata/bitstamp.h src/kraken.cpp
+        include/cloudwall/crypto-mktdata/kraken.h)
 
 add_executable(libcrypto-mktdata_test test/core_test.cpp test/coinbase_test.cpp test/bitmex_test.cpp
-        test/bitstamp_test.cpp)
+        test/bitstamp_test.cpp test/kraken_test.cpp)
 target_link_libraries(libcrypto-mktdata_test libcrypto-mktdata ${LIBS})
 

@@ -39,17 +39,16 @@ BitstampRawFeedClient::BitstampRawFeedClient(const Subscription& subscription, c
                 if (msg->type == ix::WebSocketMessageType::Open) {
                     spdlog::info("Connected to Bitstamp exchange");
 
-                    int i = 0;
                     const std::list<Channel> &channels = subscription.get_channels();
-                    for (auto channel_iter = channels.begin(); channel_iter != channels.end(); i++, channel_iter++) {
+                    for (auto channel_iter : channels) {
                         std::stringstream ss;
                         rapidjson::OStreamWrapper osw(ss);
 
                         rapidjson::Document d;
                         rapidjson::Pointer("/event").Set(d, "bts:subscribe");
 
-                        auto channel = (*channel_iter).get_name();
-                        auto ccy_pair_opt = (*channel_iter).get_ccy_pair();
+                        const std::string &channel = channel_iter.get_name();
+                        auto ccy_pair_opt = channel_iter.get_ccy_pair();
                         auto arg_json_ptr = "/data/channel";
 
                         if (ccy_pair_opt) {
@@ -71,7 +70,7 @@ BitstampRawFeedClient::BitstampRawFeedClient(const Subscription& subscription, c
                 } else if (msg->type == ix::WebSocketMessageType::Close) {
                     spdlog::info("Connection to Bitstamp closed");
                 } else if (msg->type == ix::WebSocketMessageType::Message) {
-                    SPDLOG_TRACE("Incoming message: {}", msg->str.c_str());
+                    SPDLOG_TRACE("Incoming message from Bitstamp: {}", msg->str.c_str());
                     callback_(RawFeedMessage(msg->str));
                 } else if (msg->type == ix::WebSocketMessageType::Error) {
                     std::stringstream ss;

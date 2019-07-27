@@ -15,4 +15,21 @@
 #ifndef CRYPTO_MKTDATA_KRAKEN_H
 #define CRYPTO_MKTDATA_KRAKEN_H
 
+#include <cloudwall/crypto-mktdata/core.h>
+
+using cloudwall::core::marketdata::OnRawFeedMessageCallback;
+using cloudwall::core::marketdata::RawFeedClient;
+using cloudwall::core::marketdata::Subscription;
+
+/// @brief Kraken websocket API 0.2.0
+/// @see https://www.kraken.com/features/websocket-api/
+namespace cloudwall::kraken::marketdata {
+    class KrakenRawFeedClient : public RawFeedClient {
+    public:
+        KrakenRawFeedClient(const Subscription& subscription, const OnRawFeedMessageCallback& callback);
+
+        ~KrakenRawFeedClient() = default;
+    };
+}
+
 #endif //CRYPTO_MKTDATA_KRAKEN_H
