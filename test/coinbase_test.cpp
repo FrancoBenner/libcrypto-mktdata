@@ -43,14 +43,20 @@ TEST(MarketDataClient, connect) {
         Channel("status", { }),
         Channel("heartbeat", products),
         Channel("matches", products),
-        Channel("level2", products),
-        Channel("full", products)
     });
     auto sub = Subscription(channels);
-    auto client = MarketdataClient(sub);
+    int counter = 0;
+    int* msg_count = &counter;
+    const OnMessageCallback& callback = [msg_count](const MarketdataMessage& msg) {
+        (*msg_count)++;
+        ASSERT_TRUE(msg.get_type().size() > 0);
+        ASSERT_EQ(msg.get_type(), msg.get_document()["type"].GetString());
+    };
+    auto client = MarketdataClient(sub, callback);
     client.connect();
     for (int i = 0; i < 5; i++) {
         std::this_thread::sleep_for(1s);
     }
     client.disconnect();
+    ASSERT_TRUE(*msg_count > 0);
 }

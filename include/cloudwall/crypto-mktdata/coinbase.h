@@ -21,6 +21,7 @@
 #include <rapidjson/pointer.h>
 #include <rapidjson/ostreamwrapper.h>
 #include <rapidjson/writer.h>
+#include <spdlog/spdlog.h>
 
 #include <cloudwall/crypto-mktdata/core.h>
 
@@ -31,11 +32,11 @@ namespace cloudwall::coinbase::marketdata {
     public:
         ProductId(const Currency& quote_ccy, const Currency& base_ccy);
 
-        const Currency& get_base_ccy() const {
+        [[nodiscard]] const Currency& get_base_ccy() const {
             return base_ccy_;
         }
 
-        const Currency& get_quote_ccy() const {
+        [[nodiscard]] const Currency& get_quote_ccy() const {
             return quote_ccy_;
         }
 
@@ -57,11 +58,11 @@ namespace cloudwall::coinbase::marketdata {
     public:
         Channel(const std::string& name, const std::list<ProductId>& product_ids);
 
-        const std::string& get_name() const {
+        [[nodiscard]] const std::string& get_name() const {
             return name_;
         }
 
-        const std::list<ProductId>& get_product_ids() const {
+        [[nodiscard]] const std::list<ProductId>& get_product_ids() const {
             return product_ids_;
         }
     private:
@@ -73,7 +74,7 @@ namespace cloudwall::coinbase::marketdata {
     public:
         explicit Subscription(const std::list<Channel>& channels);
 
-        const std::list<Channel>& get_channels() const {
+        [[nodiscard]] const std::list<Channel>& get_channels() const {
             return channels_;
         }
 
@@ -84,9 +85,29 @@ namespace cloudwall::coinbase::marketdata {
 
     std::ostream& operator << (std::ostream& out, const Subscription& subscription);
 
+    class MarketdataMessage {
+    public:
+        MarketdataMessage(const std::string& type, const rapidjson::Document& document);
+
+        [[nodiscard]] const std::string& get_type() const {
+            return type_;
+        }
+
+        [[nodiscard]] const rapidjson::Document& get_document() const {
+            return document_;
+        }
+
+        ~MarketdataMessage();
+    private:
+        const std::string& type_;
+        const rapidjson::Document& document_;
+    };
+
+    using OnMessageCallback = std::function<void(const MarketdataMessage&)>;
+
     class MarketdataClient {
     public:
-        explicit MarketdataClient(const Subscription& subscription);
+        MarketdataClient(const Subscription& subscription, const OnMessageCallback& callback);
 
         void connect();
 
@@ -94,7 +115,8 @@ namespace cloudwall::coinbase::marketdata {
 
         ~MarketdataClient();
     private:
-        ix::WebSocket *websocket;
+        ix::WebSocket *websocket_;
+        const OnMessageCallback& callback_;
     };
 }
 

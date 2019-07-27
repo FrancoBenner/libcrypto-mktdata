@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.14)
 project(coinbase C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
 include(conan.cmake)
@@ -9,6 +12,7 @@ include(conan.cmake)
 conan_cmake_run(REQUIRES fmt/5.3.0@bincrafters/stable
                          libuv/1.27.0@bincrafters/stable
                          rapidjson/1.1.0@bincrafters/stable
+                         spdlog/1.3.1@bincrafters/stable
                          gtest/1.8.1@bincrafters/stable
         BASIC_SETUP BUILD missing)
 

@@ -47,36 +47,45 @@ std::ostream& cloudwall::coinbase::marketdata::operator << (std::ostream& out, c
     return out;
 }
 
-MarketdataClient::MarketdataClient(const Subscription& subscription) {
-    this->websocket = new ix::WebSocket();
+MarketdataMessage::MarketdataMessage(const std::string &type, const rapidjson::Document& document)
+        : type_(type), document_(document) {
+}
+
+MarketdataMessage::~MarketdataMessage() = default;
+
+MarketdataClient::MarketdataClient(const Subscription& subscription, const OnMessageCallback& callback)
+        : callback_(callback) {
+    this->websocket_ = new ix::WebSocket();
 
     std::string url("wss://ws-feed.pro.coinbase.com/");
-    websocket->setUrl(url);
+    websocket_->setUrl(url);
 
     // Optional heart beat, sent every 45 seconds when there is not any traffic
     // to make sure that load balancers do not kill an idle connection.
-    websocket->setHeartBeatPeriod(45);
+    websocket_->setHeartBeatPeriod(45);
 
     // Setup a callback to be fired when a message or an event (open, close, error) is received
-    websocket->setOnMessageCallback(
+    websocket_->setOnMessageCallback(
             [this, subscription](const ix::WebSocketMessagePtr& msg)
             {
                 if (msg->type == ix::WebSocketMessageType::Open) {
                     // start subscription to heartbeat channel
                     std::stringstream ss;
                     ss << subscription;
-                    this->websocket->send(ss.str());
+                    this->websocket_->send(ss.str());
                 } else if (msg->type == ix::WebSocketMessageType::Close) {
-                    std::cout << "connection closed" << std::endl;
+                    spdlog::info("Connection closed");
                 } else if (msg->type == ix::WebSocketMessageType::Message) {
-                    std::cout << msg->str << std::endl;
+                    rapidjson::Document doc;
+                    doc.Parse(msg->str.c_str());
+                    callback_(MarketdataMessage(doc["type"].GetString(), doc));
                 } else if (msg->type == ix::WebSocketMessageType::Error) {
                     std::stringstream ss;
                     ss << "Connection error: " << msg->errorInfo.reason      << std::endl;
                     ss << "#retries: "         << msg->errorInfo.retries     << std::endl;
                     ss << "Wait time(ms): "    << msg->errorInfo.wait_time   << std::endl;
                     ss << "HTTP Status: "      << msg->errorInfo.http_status << std::endl;
-                    std::cout << ss.str() << std::endl;
+                    spdlog::info(ss.str());
                 } else {
                     std::cout << "Unknown message type" << std::endl;
                 }
@@ -84,14 +93,14 @@ MarketdataClient::MarketdataClient(const Subscription& subscription) {
 }
 
 void MarketdataClient::connect() {
-    this->websocket->start();
+    this->websocket_->start();
 }
 
 void MarketdataClient::disconnect() {
-    this->websocket->stop();
+    this->websocket_->stop();
 }
-
 
 MarketdataClient::~MarketdataClient() {
-    delete this->websocket;
+    delete this->websocket_;
 }
+
