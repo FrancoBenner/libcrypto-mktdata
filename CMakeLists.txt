@@ -21,19 +21,43 @@ find_package(IXWebSockets REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(ZLIB REQUIRED)
 
+set(LIBCRYPTOMKTDATA_SOURCES
+        src/core.cpp
+        src/coinbase.cpp
+        src/bitmex.cpp
+        src/bitstamp.cpp
+        src/kraken.cpp
+        src/bitfinex.cpp
+        src/binance.cpp
+        )
+
+set(LIBCRYPTOMKTDATA_HEADERS
+        include/cloudwall/crypto-mktdata/core.h
+        include/cloudwall/crypto-mktdata/coinbase.h
+        include/cloudwall/crypto-mktdata/bitmex.h
+        include/cloudwall/crypto-mktdata/bitstamp.h
+        include/cloudwall/crypto-mktdata/kraken.h
+        include/cloudwall/crypto-mktdata/bitfinex.h
+        include/cloudwall/crypto-mktdata/binance.h
+        )
+
+
 include_directories(include ${LIBIXWEBSOCKETS_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR})
 set(LIBS ${LIBS} ${CONAN_LIBS} ${LIBIXWEBSOCKETS_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES})
 list(REMOVE_ITEM LIBS boost_unit_test_framework)
 
-add_library(libcrypto-mktdata src/core.cpp include/cloudwall/crypto-mktdata/core.h
-        src/coinbase.cpp include/cloudwall/crypto-mktdata/coinbase.h src/bitmex.cpp
-        include/cloudwall/crypto-mktdata/bitmex.h src/bitstamp.cpp
-        include/cloudwall/crypto-mktdata/bitstamp.h src/kraken.cpp
-        include/cloudwall/crypto-mktdata/kraken.h src/bitfinex.cpp
-        include/cloudwall/crypto-mktdata/bitfinex.h src/binance.cpp
-        include/cloudwall/crypto-mktdata/binance.h)
+add_library(libcrypto-mktdata ${LIBCRYPTOMKTDATA_SOURCES} ${LIBCRYPTOMKTDATA_HEADERS})
 
 add_executable(libcrypto-mktdata_test test/core_test.cpp test/coinbase_test.cpp test/bitmex_test.cpp
         test/bitstamp_test.cpp test/kraken_test.cpp test/bitfinex_test.cpp test/binance_test.cpp)
 target_link_libraries(libcrypto-mktdata_test libcrypto-mktdata ${LIBS})
+if (APPLE)
+    target_link_libraries(libcrypto-mktdata_test "-framework foundation" "-framework security")
+endif()
+
+target_include_directories(libcrypto-mktdata PUBLIC ./include)
+set_target_properties(libcrypto-mktdata PROPERTIES PUBLIC_HEADER "${LIBCRYPTOMKTDATA_HEADERS}")
+install(TARGETS libcrypto-mktdata
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/include/cloudwall/crpyto-mktdata)
 
