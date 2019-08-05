@@ -79,6 +79,8 @@ BitfinexRawFeedClient::BitfinexRawFeedClient(const Subscription& subscription, c
                     ss << "Wait time (ms): " << msg->errorInfo.wait_time << std::endl;
                     ss << "HTTP Status: " << msg->errorInfo.http_status << std::endl;
                     spdlog::info(ss.str());
+                } else if (msg->type == ix::WebSocketMessageType::Pong) {
+                    spdlog::debug("received pong message");
                 } else {
                     spdlog::error("Unknown message type");
                 }
