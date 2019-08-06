@@ -19,6 +19,7 @@ conan_cmake_run(REQUIRES boost/1.70.0@conan/stable
 find_package(IXWebSocket REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(ZLIB REQUIRED)
+find_package(Date REQUIRED)
 
 set(LIBCRYPTOMKTDATA_SOURCES
         src/core.cpp

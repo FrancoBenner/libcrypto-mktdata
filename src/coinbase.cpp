@@ -81,3 +81,36 @@ CoinbaseRawFeedClient::CoinbaseRawFeedClient(const Subscription& subscription,
                 }
             });
 }
+
+ProductStatus::ProductStatus(rapidjson::Value::ConstValueIterator product_json_iter) {
+    auto product_json = product_json_iter->GetObject();
+    std::string base_ccy_id = product_json["base_currency"].GetString();
+    std::string quote_ccy_id = product_json["quote_currency"].GetString();
+
+    this->id_ = new std::string(product_json["id"].GetString());
+    this->ccy_pair_ = new CurrencyPair(Currency(base_ccy_id), Currency(quote_ccy_id));
+    this->status_ = new std::string(product_json["status"].GetString());
+    this->status_message_ = new std::string(product_json["status_message"].GetString());
+}
+
+ProductStatus::~ProductStatus() {
+    delete id_;
+    delete ccy_pair_;
+    delete status_;
+    delete status_message_;
+}
+
+ProductStatusEvent::ProductStatusEvent(const std::string& raw_json) {
+    this->products_ = new std::list<ProductStatus*>();
+
+    auto d = rapidjson::Document();
+    d.Parse(raw_json.c_str());
+    const rapidjson::Value& products = d["products"];
+    for (rapidjson::Value::ConstValueIterator itr = products.Begin(); itr != products.End(); ++itr) {
+        this->products_->emplace_back(new ProductStatus(itr));
+    }
+}
+
+ProductStatusEvent::~ProductStatusEvent() {
+    delete this->products_;
+}

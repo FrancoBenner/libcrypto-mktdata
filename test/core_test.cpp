@@ -48,3 +48,11 @@ TEST(ProductId, init) {
     ASSERT_TRUE(p1 == p1);
     ASSERT_FALSE(p1 == p2);
 }
+
+TEST(Side, lookup) {
+    Side buy = kSideByName["buy"];
+    Side sell = kSideByName["sell"];
+
+    ASSERT_EQ(Side::buy, buy);
+    ASSERT_EQ(Side::sell, sell);
+}

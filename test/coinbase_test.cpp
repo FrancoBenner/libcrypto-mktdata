@@ -18,12 +18,16 @@
 #include <chrono>
 #include <thread>
 
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 #include <gtest/gtest.h>
+
 #include <cloudwall/crypto-mktdata/coinbase.h>
 
 using namespace std::chrono_literals;
 
 using cloudwall::coinbase::marketdata::CoinbaseRawFeedClient;
+using cloudwall::coinbase::marketdata::ProductStatusEvent;
 using cloudwall::core::marketdata::Channel;
 using cloudwall::core::marketdata::Currency;
 using cloudwall::core::marketdata::CurrencyPair;
@@ -51,4 +55,16 @@ TEST(CoinbaseProRawFeedClient, connect) {
     }
     client.disconnect();
     ASSERT_TRUE(*msg_count > 0);
+}
+
+TEST(ProductStatusEvent, parse) {
+    boost::filesystem::path test_path(__FILE__);
+    boost::filesystem::path json_path = test_path.remove_filename().append("example_status_msg.json");
+    boost::filesystem::ifstream ifs(json_path);
+
+    std::stringstream sstr;
+    sstr << ifs.rdbuf();
+
+    auto event = ProductStatusEvent(sstr.str());
+    ASSERT_EQ(48, event.get_products().size());
 }

@@ -19,6 +19,7 @@
 #include <list>
 #include <ostream>
 
+#include <boost/assign.hpp>
 #include <fmt/core.h>
 #include <ixwebsocket/IXWebSocket.h>
 #include <ixwebsocket/IXSocket.h>
@@ -71,6 +72,16 @@ namespace cloudwall::core::marketdata {
 
         const Currency& quote_ccy_;
     };
+
+    /// @brief trade side, buy or sell -- note short sell and other more specialized types not supported in this API
+    enum Side {
+      buy,
+      sell
+    };
+
+    /// @brief simple lookup table that maps side names to Side enums
+    inline std::map<std::string, Side> kSideByName = // NOLINT(cert-err58-cpp)
+            boost::assign::map_list_of("buy", buy)("sell", sell);
 
     /// @brief a channel or topic on the exchange feed that you can subscribe to, optionally qualified by currency pair
     class Channel {

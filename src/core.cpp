@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include <cloudwall/crypto-mktdata/coinbase.h>
-#include <iostream>
 #include <sstream>
 
 using namespace cloudwall::core::marketdata;
