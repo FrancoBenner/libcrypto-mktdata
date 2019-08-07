@@ -64,7 +64,12 @@ TEST(ProductStatusEvent, parse) {
 
     std::stringstream sstr;
     sstr << ifs.rdbuf();
-
     auto event = ProductStatusEvent(sstr.str());
+    auto first = event.get_products().front();
+
     ASSERT_EQ(48, event.get_products().size());
+    ASSERT_EQ("ZEC-BTC", first->get_id());
+    ASSERT_EQ("ZEC", first->get_currency_pair().get_base_ccy().get_ccy_code());
+    ASSERT_EQ("online", first->get_status());
+    ASSERT_EQ("", first->get_status_message());
 }

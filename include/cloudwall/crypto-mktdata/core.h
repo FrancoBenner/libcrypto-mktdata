@@ -45,7 +45,7 @@ namespace cloudwall::core::marketdata {
         ~Currency() = default;
 
     private:
-        const std::string &ccy_code_;
+        std::string ccy_code_;
     };
 
     /// @brief a reference to an exchange-traded currency pair
@@ -68,9 +68,9 @@ namespace cloudwall::core::marketdata {
 
         ~CurrencyPair() = default;
     private:
-        const Currency& base_ccy_;
+        Currency base_ccy_;
 
-        const Currency& quote_ccy_;
+        Currency quote_ccy_;
     };
 
     /// @brief trade side, buy or sell -- note short sell and other more specialized types not supported in this API
@@ -97,8 +97,8 @@ namespace cloudwall::core::marketdata {
             return ccy_pair_;
         }
     private:
-        const std::string& name_;
-        const std::experimental::optional<CurrencyPair>& ccy_pair_;
+        std::string name_;
+        std::experimental::optional<CurrencyPair> ccy_pair_;
     };
 
     /// @brief a composite subscription to one or more channels
@@ -112,7 +112,7 @@ namespace cloudwall::core::marketdata {
 
         ~Subscription() = default;
     private:
-        const std::list<Channel>& channels_;
+        std::list<Channel> channels_;
     };
 
     /// @brief wrapper around a raw Websocket feed message, typically in JSON
@@ -126,7 +126,7 @@ namespace cloudwall::core::marketdata {
 
         ~RawFeedMessage();
     private:
-        const std::string& raw_json_;
+        std::string raw_json_;
     };
 
     /// @brief callback function made every time a new message is received on a websocket channel
@@ -151,7 +151,7 @@ namespace cloudwall::core::marketdata {
         }
     protected:
         ix::WebSocket *websocket_;
-        const OnRawFeedMessageCallback& callback_;
+        OnRawFeedMessageCallback callback_;
     };
 }
 

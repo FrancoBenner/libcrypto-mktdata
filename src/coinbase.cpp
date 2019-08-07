@@ -84,11 +84,14 @@ CoinbaseRawFeedClient::CoinbaseRawFeedClient(const Subscription& subscription,
 
 ProductStatus::ProductStatus(rapidjson::Value::ConstValueIterator product_json_iter) {
     auto product_json = product_json_iter->GetObject();
+
     std::string base_ccy_id = product_json["base_currency"].GetString();
     std::string quote_ccy_id = product_json["quote_currency"].GetString();
+    auto base_ccy = Currency(base_ccy_id);
+    auto quote_ccy = Currency(quote_ccy_id);
 
     this->id_ = new std::string(product_json["id"].GetString());
-    this->ccy_pair_ = new CurrencyPair(Currency(base_ccy_id), Currency(quote_ccy_id));
+    this->ccy_pair_ = new CurrencyPair(base_ccy, quote_ccy);
     this->status_ = new std::string(product_json["status"].GetString());
     this->status_message_ = new std::string(product_json["status_message"].GetString());
 }
