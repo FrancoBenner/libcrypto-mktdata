@@ -55,7 +55,7 @@ BitstampRawFeedClient::BitstampRawFeedClient(const Subscription& subscription, c
                             auto ccy_pair = ccy_pair_opt.value();
                             auto quote_ccy = boost::algorithm::to_lower_copy(ccy_pair.get_quote_ccy().get_ccy_code());
                             auto base_ccy = boost::algorithm::to_lower_copy(ccy_pair.get_base_ccy().get_ccy_code());
-                            auto ccy_pair_txt = fmt::format("{0}_{1}{2}", channel, quote_ccy, base_ccy);
+                            auto ccy_pair_txt = fmt::format("{0}_{1}{2}", channel, base_ccy, quote_ccy);
                             rapidjson::Pointer(channel_json_ptr).Set(d, ccy_pair_txt.c_str());
                         } else {
                             rapidjson::Pointer(channel_json_ptr).Set(d, channel.c_str());

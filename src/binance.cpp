@@ -30,9 +30,9 @@ BinanceRawFeedClient::BinanceRawFeedClient(const Subscription& subscription,
     const std::list<Channel> &channels = subscription.get_channels();
     for (auto channel : channels) {
         spdlog::info("Subscribing to channel: {}", channel.get_name());
-        auto quote_ccy =  boost::algorithm::to_lower_copy(channel.get_ccy_pair().value().get_quote_ccy().get_ccy_code());
         auto base_ccy =  boost::algorithm::to_lower_copy(channel.get_ccy_pair().value().get_base_ccy().get_ccy_code());
-        ss << quote_ccy << base_ccy << "@" << channel.get_name() << "/";
+        auto quote_ccy =  boost::algorithm::to_lower_copy(channel.get_ccy_pair().value().get_quote_ccy().get_ccy_code());
+        ss << base_ccy << quote_ccy << "@" << channel.get_name() << "/";
     }
     auto url = ss.str();
     url.pop_back();

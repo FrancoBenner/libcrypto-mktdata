@@ -50,8 +50,8 @@ KrakenRawFeedClient::KrakenRawFeedClient(const Subscription& subscription,
                         if (ccy_pair_opt) {
                             auto ccy_pair = ccy_pair_opt.value();
                             auto pair_json_ptr = "/pair/0";
-                            auto ccy_pair_txt = fmt::format("{0}/{1}", ccy_pair.get_quote_ccy().get_ccy_code(),
-                                                            ccy_pair.get_base_ccy().get_ccy_code());
+                            auto ccy_pair_txt = fmt::format("{0}/{1}", ccy_pair.get_base_ccy().get_ccy_code(),
+                                                            ccy_pair.get_quote_ccy().get_ccy_code());
                             rapidjson::Pointer(pair_json_ptr).Set(d, ccy_pair_txt.c_str());
                         }
 

@@ -51,7 +51,7 @@ namespace cloudwall::core::marketdata {
     /// @brief a reference to an exchange-traded currency pair
     class CurrencyPair {
     public:
-        CurrencyPair(const Currency& quote_ccy, const Currency& base_ccy);
+        CurrencyPair(const Currency& base_ccy, const Currency& quote_ccy);
 
         [[nodiscard]] const Currency& get_base_ccy() const {
             return base_ccy_;

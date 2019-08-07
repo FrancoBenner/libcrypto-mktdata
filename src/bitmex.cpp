@@ -50,8 +50,8 @@ BitMexRawFeedClient::BitMexRawFeedClient(const Subscription& subscription, const
 
                         if (ccy_pair_opt) {
                             auto ccy_pair = ccy_pair_opt.value();
-                            auto ccy_pair_txt = fmt::format("{0}:{1}{2}", topic, ccy_pair.get_quote_ccy().get_ccy_code(),
-                                                            ccy_pair.get_base_ccy().get_ccy_code());
+                            auto ccy_pair_txt = fmt::format("{0}:{1}{2}", topic, ccy_pair.get_base_ccy().get_ccy_code(),
+                                                            ccy_pair.get_quote_ccy().get_ccy_code());
                             rapidjson::Pointer(arg_json_ptr.c_str()).Set(d, ccy_pair_txt.c_str());
                         } else {
                             rapidjson::Pointer(arg_json_ptr.c_str()).Set(d, topic.c_str());

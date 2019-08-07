@@ -56,7 +56,7 @@ BitfinexRawFeedClient::BitfinexRawFeedClient(const Subscription& subscription, c
                             auto ccy_pair = ccy_pair_opt.value();
                             auto quote_ccy = ccy_pair.get_quote_ccy().get_ccy_code();
                             auto base_ccy = ccy_pair.get_base_ccy().get_ccy_code();
-                            auto ccy_pair_txt = fmt::format("t{1}{2}", channel, quote_ccy, base_ccy);
+                            auto ccy_pair_txt = fmt::format("t{1}{2}", channel, base_ccy, quote_ccy);
                             auto sym_json_ptr = "/symbol";
                             rapidjson::Pointer(sym_json_ptr).Set(d, ccy_pair_txt.c_str());
                         }
