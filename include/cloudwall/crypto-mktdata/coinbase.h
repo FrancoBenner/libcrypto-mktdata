@@ -37,7 +37,7 @@ namespace cloudwall::coinbase::marketdata {
           ticker
         };
 
-        virtual EventType getCoinbaseEventType() const = 0;
+        [[nodiscard]] virtual EventType getCoinbaseEventType() const = 0;
     };
 
     /// @brief callback function made every time a new event is parsed from the feed
@@ -77,59 +77,59 @@ namespace cloudwall::coinbase::marketdata {
     public:
         explicit ProductStatus(rapidjson::Value::ConstValueIterator product_json);
 
-        const std::string& get_id() const {
+        [[nodiscard]] const std::string& get_id() const {
             return *id_;
         }
 
-        const CurrencyPair& get_currency_pair() const {
+        [[nodiscard]] const CurrencyPair& get_currency_pair() const {
             return *ccy_pair_;
         }
 
-        const double get_base_min_size() const {
+        [[nodiscard]] double get_base_min_size() const {
             return base_min_size_;
         }
 
-        const double get_base_max_size() const {
+        [[nodiscard]] double get_base_max_size() const {
             return base_max_size_;
         }
 
-        const double get_base_increment() const {
+        [[nodiscard]] double get_base_increment() const {
             return base_increment_;
         }
 
-        const double get_quote_increment() const {
+        [[nodiscard]] double get_quote_increment() const {
             return quote_increment_;
         }
 
-        const double get_min_market_funds() const {
+        [[nodiscard]] double get_min_market_funds() const {
             return min_market_funds_;
         }
 
-        const double get_max_market_funds() const {
+        [[nodiscard]] double get_max_market_funds() const {
             return max_market_funds_;
         }
 
-        const bool is_post_only() const {
+        [[nodiscard]] bool is_post_only() const {
             return post_only_;
         }
 
-        const bool is_limit_only() const {
+        [[nodiscard]] bool is_limit_only() const {
             return limit_only_;
         }
 
-        const bool is_cancel_only() const {
+        [[nodiscard]] bool is_cancel_only() const {
             return cancel_only_;
         }
 
-        const bool is_margin_enabled() const {
+        [[nodiscard]] bool is_margin_enabled() const {
             return margin_enabled_;
         }
 
-        const std::string& get_status() const {
+        [[nodiscard]] std::string& get_status() const {
             return *status_;
         }
 
-        const std::string& get_status_message() const {
+        [[nodiscard]] std::string& get_status_message() const {
             return *status_message_;
         }
 
@@ -159,11 +159,11 @@ namespace cloudwall::coinbase::marketdata {
         explicit ProductStatusEvent(const std::string& raw_json);
         explicit ProductStatusEvent(const rapidjson::Document& doc);
 
-        EventType getCoinbaseEventType() const {
+        [[nodiscard]] EventType getCoinbaseEventType() const override {
             return EventType::status;
         }
 
-        const std::list<ProductStatus*>& get_products() const {
+        [[nodiscard]] const std::list<ProductStatus*>& get_products() const {
             return *products_;
         }
 
@@ -179,47 +179,47 @@ namespace cloudwall::coinbase::marketdata {
     public:
         explicit MatchEvent(const std::string& raw_json);
 
-        EventType getCoinbaseEventType() const {
+        [[nodiscard]] EventType getCoinbaseEventType() const override {
             return EventType::match;
         }
 
-        const long get_trade_id() const {
+        [[nodiscard]] long get_trade_id() const {
             return trade_id_;
         }
 
-        const long get_sequence_number() const {
+        [[nodiscard]] long get_sequence_number() const {
             return sequence_num_;
         }
 
-        const CurrencyPair& get_currency_pair() const {
+        [[nodiscard]] CurrencyPair& get_currency_pair() const {
             return *ccy_pair_;
         }
 
-        const std::string& get_maker_order_id() const {
+        [[nodiscard]] const std::string& get_maker_order_id() const {
             return *maker_order_id_;
         }
 
-        const std::string& get_taker_order_id() const {
+        [[nodiscard]] const std::string& get_taker_order_id() const {
             return *taker_order_id_;
         }
 
-        const Side& get_side() const {
+        [[nodiscard]] const Side& get_side() const {
             return *side_;
         }
 
-        const double get_size() const {
+        [[nodiscard]] double get_size() const {
             return size_;
         }
 
-        const double get_price() const {
+        [[nodiscard]] double get_price() const {
             return price_;
         }
 
-        const std::string& get_unparsed_timestamp() const {
+        [[nodiscard]] const std::string& get_unparsed_timestamp() const {
             return *timestamp_txt_;
         }
 
-        const date::sys_time<std::chrono::microseconds>& parse_timstamp() const;
+        [[nodiscard]] const date::sys_time<std::chrono::microseconds>& parse_timstamp() const;
 
         ~MatchEvent();
     private:
@@ -239,75 +239,75 @@ namespace cloudwall::coinbase::marketdata {
     /// to consume top N levels or full book-type marketdata
     class TickerEvent : CoinbaseEvent {
     public:
-        EventType getCoinbaseEventType() const {
+        [[nodiscard]] EventType getCoinbaseEventType() const override {
             return EventType::ticker;
         }
 
-        const long get_sequence_id() const {
+        [[nodiscard]] long get_sequence_id() const {
             return sequence_id_;
         }
 
-        const CurrencyPair& get_currency_pair() const {
+        [[nodiscard]] const CurrencyPair& get_currency_pair() const {
             return *ccy_pair_;
         }
 
-        const double get_best_bid_price() const {
+        [[nodiscard]] double get_best_bid_price() const {
             return best_bid_;
         }
 
-        const std::experimental::optional<double> get_best_bid_size() const {
+        [[nodiscard]] std::experimental::optional<double> get_best_bid_size() const {
             return std::experimental::nullopt;
         }
 
-        const double get_best_ask_price() const {
+        [[nodiscard]] double get_best_ask_price() const {
             return best_ask_;
         }
 
-        const std::experimental::optional<double> get_best_ask_size() const {
+        [[nodiscard]] std::experimental::optional<double> get_best_ask_size() const {
             return std::experimental::nullopt;
         }
 
-        const double get_spread() const {
+        [[nodiscard]] double get_spread() const {
             return get_best_ask_price() - get_best_bid_price();
         }
 
-        const long get_last_trade_id() const {
+        [[nodiscard]] long get_last_trade_id() const {
             return last_trade_id_;
         }
 
-        const double get_last_price() const {
+        [[nodiscard]] double get_last_price() const {
             return last_price_;
         }
 
-        const double get_last_size() const {
+        [[nodiscard]] double get_last_size() const {
             return last_size_;
         }
 
-        const double get_open_24h() const {
+        [[nodiscard]] double get_open_24h() const {
             return open_24h_;
         }
 
-        const double get_high_24h() const {
+        [[nodiscard]] double get_high_24h() const {
             return high_24h_;
         }
 
-        const double get_low_24h() const {
+        [[nodiscard]] double get_low_24h() const {
             return low_24h_;
         }
 
-        const double get_volume_24h() const {
+        [[nodiscard]] double get_volume_24h() const {
             return volume_24h_;
         }
 
-        const double get_volume_30d() const {
+        [[nodiscard]] double get_volume_30d() const {
             return volume_30d_;
         }
 
-        const std::string& get_timestamp_unparsed() const {
+        [[nodiscard]] const std::string& get_timestamp_unparsed() const {
             return *timestamp_txt_;
         }
 
-        const date::sys_time<std::chrono::microseconds>& parse_timstamp() const;
+        [[nodiscard]] const date::sys_time<std::chrono::microseconds>& parse_timstamp() const;
 
         ~TickerEvent();
     private:
