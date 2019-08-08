@@ -26,7 +26,10 @@
 
 using namespace std::chrono_literals;
 
+using cloudwall::coinbase::marketdata::CoinbaseEvent;
+using cloudwall::coinbase::marketdata::CoinbaseEventClient;
 using cloudwall::coinbase::marketdata::CoinbaseRawFeedClient;
+using cloudwall::coinbase::marketdata::OnCoinbaseEventCallback;
 using cloudwall::coinbase::marketdata::ProductStatusEvent;
 using cloudwall::core::marketdata::Channel;
 using cloudwall::core::marketdata::Currency;
@@ -72,4 +75,30 @@ TEST(ProductStatusEvent, parse) {
     ASSERT_EQ("ZEC", first->get_currency_pair().get_base_ccy().get_ccy_code());
     ASSERT_EQ("online", first->get_status());
     ASSERT_EQ("", first->get_status_message());
+}
+
+TEST(CoinbaseEventClient, product_status_only) {
+    auto ccy_pair = CurrencyPair(Currency("BTC"), Currency("USD"));
+    std::list<Channel> channels({
+            Channel("status", { })
+    });
+    auto sub = Subscription(channels);
+    int counter = 0;
+    int* msg_count = &counter;
+    const OnCoinbaseEventCallback& callback = [msg_count](const CoinbaseEvent& event) {
+      if (CoinbaseEvent::EventType::status == event.getCoinbaseEventType()) {
+          (*msg_count)++;
+          const ProductStatusEvent& specific = static_cast<const ProductStatusEvent&>(event);
+          ASSERT_TRUE(specific.get_products().size() > 0);
+      } else {
+          FAIL();
+      }
+    };
+    auto client = CoinbaseEventClient(sub, callback);
+    client.connect();
+    for (int i = 0; i < 5; i++) {
+        std::this_thread::sleep_for(1s);
+    }
+    client.disconnect();
+    ASSERT_TRUE(*msg_count > 0);
 }

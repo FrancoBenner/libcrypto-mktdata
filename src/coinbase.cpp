@@ -82,6 +82,18 @@ CoinbaseRawFeedClient::CoinbaseRawFeedClient(const Subscription& subscription,
             });
 }
 
+CoinbaseEventClient::CoinbaseEventClient(const Subscription& subscription, const OnCoinbaseEventCallback& callback) {
+    OnRawFeedMessageCallback raw_callback = [callback](const RawFeedMessage& message) {
+        auto d = rapidjson::Document();
+        auto raw_json = message.get_raw_json();
+        d.Parse(raw_json.c_str());
+        if (d["type"] == "status") {
+            callback(ProductStatusEvent(d));
+        }
+    };
+    this->raw_feed_client_ = new CoinbaseRawFeedClient(subscription, raw_callback);
+}
+
 ProductStatus::ProductStatus(rapidjson::Value::ConstValueIterator product_json_iter) {
     auto product_json = product_json_iter->GetObject();
 
@@ -104,11 +116,18 @@ ProductStatus::~ProductStatus() {
 }
 
 ProductStatusEvent::ProductStatusEvent(const std::string& raw_json) {
-    this->products_ = new std::list<ProductStatus*>();
-
     auto d = rapidjson::Document();
     d.Parse(raw_json.c_str());
-    const rapidjson::Value& products = d["products"];
+    init(d);
+}
+
+ProductStatusEvent::ProductStatusEvent(const rapidjson::Document& doc) {
+    init(doc);
+}
+
+void ProductStatusEvent::init(const rapidjson::Document& doc) {
+    this->products_ = new std::list<ProductStatus*>();
+    const rapidjson::Value& products = doc["products"];
     for (rapidjson::Value::ConstValueIterator itr = products.Begin(); itr != products.End(); ++itr) {
         this->products_->emplace_back(new ProductStatus(itr));
     }
@@ -117,3 +136,4 @@ ProductStatusEvent::ProductStatusEvent(const std::string& raw_json) {
 ProductStatusEvent::~ProductStatusEvent() {
     delete this->products_;
 }
+

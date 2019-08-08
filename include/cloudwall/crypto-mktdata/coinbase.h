@@ -30,7 +30,14 @@ using cloudwall::core::marketdata::Subscription;
 /// @see https://docs.pro.coinbase.com/
 namespace cloudwall::coinbase::marketdata {
     class CoinbaseEvent {
+    public:
+        enum EventType {
+          match,
+          status,
+          ticker
+        };
 
+        virtual EventType getCoinbaseEventType() const = 0;
     };
 
     /// @brief callback function made every time a new event is parsed from the feed
@@ -49,7 +56,20 @@ namespace cloudwall::coinbase::marketdata {
     public:
         CoinbaseEventClient(const Subscription& subscription, const OnCoinbaseEventCallback& callback);
 
-        ~CoinbaseEventClient();
+        void connect() {
+            this->raw_feed_client_->connect();
+        }
+
+        void disconnect() {
+            this->raw_feed_client_->disconnect();
+        }
+
+        ~CoinbaseEventClient() {
+            delete this->raw_feed_client_;
+        }
+
+    private:
+        CoinbaseRawFeedClient* raw_feed_client_;
     };
 
     /// @brief product metadata for Coinbase exchange for a particular currency pair
@@ -134,9 +154,14 @@ namespace cloudwall::coinbase::marketdata {
 
     /// @brief subset of the Coinbase product status message which has products but not currencies; the latter provides
     /// a lot of detail on cryptocurrencies which are view-only for the exchange, and so not as relevant
-    class ProductStatusEvent {
+    class ProductStatusEvent : public CoinbaseEvent {
     public:
         explicit ProductStatusEvent(const std::string& raw_json);
+        explicit ProductStatusEvent(const rapidjson::Document& doc);
+
+        EventType getCoinbaseEventType() const {
+            return EventType::status;
+        }
 
         const std::list<ProductStatus*>& get_products() const {
             return *products_;
@@ -145,12 +170,18 @@ namespace cloudwall::coinbase::marketdata {
         ~ProductStatusEvent();
     private:
         std::list<ProductStatus*>* products_;
+
+        void init(const rapidjson::Document& doc);
     };
 
     /// @brief event fired when there is a trade match on the Coinbase exchange
-    class MatchEvent {
+    class MatchEvent : public CoinbaseEvent {
     public:
         explicit MatchEvent(const std::string& raw_json);
+
+        EventType getCoinbaseEventType() const {
+            return EventType::match;
+        }
 
         const long get_trade_id() const {
             return trade_id_;
@@ -206,8 +237,12 @@ namespace cloudwall::coinbase::marketdata {
     /// @brief event corresponding to the "ticker" channel, which has top-of-book and current volumes, 24H open/high/low
     /// and last trade price and size; this lower-frequency channel may be useful for applications that don't need
     /// to consume top N levels or full book-type marketdata
-    class TickerEvent {
+    class TickerEvent : CoinbaseEvent {
     public:
+        EventType getCoinbaseEventType() const {
+            return EventType::ticker;
+        }
+
         const long get_sequence_id() const {
             return sequence_id_;
         }
