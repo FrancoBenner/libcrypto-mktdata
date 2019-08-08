@@ -29,6 +29,7 @@ using namespace std::chrono_literals;
 using cloudwall::coinbase::marketdata::CoinbaseEvent;
 using cloudwall::coinbase::marketdata::CoinbaseEventClient;
 using cloudwall::coinbase::marketdata::CoinbaseRawFeedClient;
+using cloudwall::coinbase::marketdata::MatchEvent;
 using cloudwall::coinbase::marketdata::OnCoinbaseEventCallback;
 using cloudwall::coinbase::marketdata::ProductStatusEvent;
 using cloudwall::core::marketdata::Channel;
@@ -85,6 +86,30 @@ TEST(ProductStatusEvent, parse) {
     ASSERT_FALSE(first->is_post_only());
     ASSERT_EQ("online", first->get_status());
     ASSERT_EQ("", first->get_status_message());
+}
+
+TEST(MatchEvent, parse) {
+    boost::filesystem::path test_path(__FILE__);
+    boost::filesystem::path json_path = test_path.remove_filename().append("example_match_msg.json");
+    boost::filesystem::ifstream ifs(json_path);
+
+    std::stringstream sstr;
+    sstr << ifs.rdbuf();
+    auto doc = rapidjson::Document();
+    doc.Parse(sstr.str().c_str());
+    auto event = MatchEvent(doc);
+
+    ASSERT_EQ(71767920, event.get_trade_id());
+    ASSERT_EQ(10480841980, event.get_sequence_number());
+    ASSERT_EQ("BTC", event.get_currency_pair().get_base_ccy().get_ccy_code());
+    ASSERT_EQ("USD", event.get_currency_pair().get_quote_ccy().get_ccy_code());
+    ASSERT_EQ(Side::sell, event.get_side());
+    ASSERT_EQ("199d5dfe-f45b-4591-b635-6d8f585193e9", event.get_maker_order_id());
+    ASSERT_EQ("116d20af-d723-4352-9398-d7b0e7c38a27", event.get_taker_order_id());
+    ASSERT_DOUBLE_EQ(0.01671111, event.get_size());
+    ASSERT_DOUBLE_EQ(11730.37, event.get_price());
+    ASSERT_EQ("2019-08-08T16:09:40.587000Z", event.get_unparsed_timestamp());
+    ASSERT_EQ(1565280580587000L, event.parse_timstamp()->time_since_epoch().count());
 }
 
 TEST(CoinbaseEventClient, product_status_only) {

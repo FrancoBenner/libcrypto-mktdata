@@ -31,10 +31,19 @@ Subscription::Subscription(const std::list<Channel>& channels): channels_(channe
 RawFeedMessage::RawFeedMessage(const std::string &raw_json) : raw_json_(raw_json) {
 }
 
-double cloudwall::core::marketdata::json_string_to_double(
-        rapidjson::GenericObject<true, rapidjson::GenericValue<rapidjson::UTF8<char>>> doc, const char* field_name) {
-    const char* val_txt = doc[field_name].GetString();
+double fastparse_double(const char* val_txt) {
     double val = 0.0;
     boost::spirit::qi::parse(val_txt, &val_txt[strlen(val_txt)], boost::spirit::qi::double_, val);
     return val;
+}
+
+double cloudwall::core::marketdata::json_string_to_double(
+        rapidjson::GenericObject<true, rapidjson::GenericValue<rapidjson::UTF8<char>>> json, const char* field_name) {
+    const char* val_txt = json[field_name].GetString();
+    return fastparse_double(val_txt);
+}
+
+double cloudwall::core::marketdata::json_string_to_double(const rapidjson::Document& json, const char* field_name) {
+    const char* val_txt = json[field_name].GetString();
+    return fastparse_double(val_txt);
 }

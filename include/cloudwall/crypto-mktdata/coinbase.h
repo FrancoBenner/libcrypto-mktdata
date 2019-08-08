@@ -177,7 +177,7 @@ namespace cloudwall::coinbase::marketdata {
     /// @brief event fired when there is a trade match on the Coinbase exchange
     class MatchEvent : public CoinbaseEvent {
     public:
-        explicit MatchEvent(const std::string& raw_json);
+        explicit MatchEvent(const rapidjson::Document& json);
 
         [[nodiscard]] EventType getCoinbaseEventType() const override {
             return EventType::match;
@@ -219,7 +219,7 @@ namespace cloudwall::coinbase::marketdata {
             return *timestamp_txt_;
         }
 
-        [[nodiscard]] const date::sys_time<std::chrono::microseconds>& parse_timstamp() const;
+        [[nodiscard]] const std::chrono::system_clock::time_point* parse_timstamp() const;
 
         ~MatchEvent();
     private:
@@ -239,6 +239,10 @@ namespace cloudwall::coinbase::marketdata {
     /// to consume top N levels or full book-type marketdata
     class TickerEvent : CoinbaseEvent {
     public:
+        explicit TickerEvent(const std::string& raw_json);
+
+        explicit TickerEvent(const rapidjson::Document& json);
+
         [[nodiscard]] EventType getCoinbaseEventType() const override {
             return EventType::ticker;
         }
@@ -307,7 +311,7 @@ namespace cloudwall::coinbase::marketdata {
             return *timestamp_txt_;
         }
 
-        [[nodiscard]] const date::sys_time<std::chrono::microseconds>& parse_timstamp() const;
+        [[nodiscard]] const std::chrono::system_clock::time_point& parse_timstamp() const;
 
         ~TickerEvent();
     private:
@@ -328,6 +332,8 @@ namespace cloudwall::coinbase::marketdata {
         double volume_30d_;
 
         std::string* timestamp_txt_;
+
+        void init(const rapidjson::Document& json);
     };
 }
 

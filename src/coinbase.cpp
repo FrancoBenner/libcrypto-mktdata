@@ -14,13 +14,12 @@
 
 #include <cloudwall/crypto-mktdata/coinbase.h>
 
-#include <sstream>
-
 using namespace cloudwall::coinbase::marketdata;
 
+using cloudwall::core::marketdata::kSideByName;
+using cloudwall::core::marketdata::json_string_to_double;
 using cloudwall::core::marketdata::Channel;
 using cloudwall::core::marketdata::RawFeedMessage;
-using cloudwall::core::marketdata::json_string_to_double;
 
 CoinbaseRawFeedClient::CoinbaseRawFeedClient(const Subscription& subscription,
         const OnRawFeedMessageCallback& callback) : RawFeedClient(new ix::WebSocket(), callback) {
@@ -39,7 +38,7 @@ CoinbaseRawFeedClient::CoinbaseRawFeedClient(const Subscription& subscription,
                     spdlog::info("Connected to Coinbase Pro exchange");
 
                     const std::list<Channel> &channels = subscription.get_channels();
-                    for (auto channel : channels) {
+                    for (const auto& channel : channels) {
                         rapidjson::Document d;
                         rapidjson::Pointer("/type").Set(d, "subscribe");
 
@@ -86,7 +85,7 @@ CoinbaseRawFeedClient::CoinbaseRawFeedClient(const Subscription& subscription,
 CoinbaseEventClient::CoinbaseEventClient(const Subscription& subscription, const OnCoinbaseEventCallback& callback) {
     OnRawFeedMessageCallback raw_callback = [callback](const RawFeedMessage& message) {
         auto d = rapidjson::Document();
-        auto raw_json = message.get_raw_json();
+        const auto& raw_json = message.get_raw_json();
         d.Parse(raw_json.c_str());
         if (d["type"] == "status") {
             callback(ProductStatusEvent(d));
@@ -128,17 +127,18 @@ ProductStatus::~ProductStatus() {
 }
 
 ProductStatusEvent::ProductStatusEvent(const std::string& raw_json) {
+    this->products_ = new std::list<ProductStatus*>();
     auto d = rapidjson::Document();
     d.Parse(raw_json.c_str());
     init(d);
 }
 
 ProductStatusEvent::ProductStatusEvent(const rapidjson::Document& doc) {
+    this->products_ = new std::list<ProductStatus*>();
     init(doc);
 }
 
 void ProductStatusEvent::init(const rapidjson::Document& doc) {
-    this->products_ = new std::list<ProductStatus*>();
     const rapidjson::Value& products = doc["products"];
     for (rapidjson::Value::ConstValueIterator itr = products.Begin(); itr != products.End(); ++itr) {
         this->products_->emplace_back(new ProductStatus(itr));
@@ -149,3 +149,40 @@ ProductStatusEvent::~ProductStatusEvent() {
     delete this->products_;
 }
 
+MatchEvent::MatchEvent(const rapidjson::Document& json) {
+    this->trade_id_ = json["trade_id"].GetInt64();
+    this->sequence_num_ = json["sequence"].GetInt64();
+    this->maker_order_id_ = new std::string(json["maker_order_id"].GetString());
+    this->taker_order_id_ = new std::string(json["taker_order_id"].GetString());
+    this->size_ = json_string_to_double(json, "size");
+    this->price_ = json_string_to_double(json, "price");
+    this->timestamp_txt_ = new std::string(json["time"].GetString());
+
+    // look up Side enum by name
+    auto side_txt = json["side"].GetString();
+    this->side_ = &kSideByName[side_txt];
+
+    // we should cache the parsed CurrencyPair in a map for performance; ideally there should be only
+    // one Currency per string currency code and one CurrencyPair per unique pair of currency codes
+    auto product_id = json["product_id"].GetString();
+    std::vector<std::string> product_id_parts;
+    boost::split(product_id_parts, product_id, [](wchar_t ch) -> bool { return ch == (wchar_t) '-'; });
+    std::string base_ccy_txt = product_id_parts[0];
+    std::string quote_ccy_txt = product_id_parts[1];
+    Currency base_ccy = Currency(base_ccy_txt);
+    Currency quote_ccy = Currency(quote_ccy_txt);
+    this->ccy_pair_ = new CurrencyPair(base_ccy, quote_ccy);
+}
+
+const std::chrono::system_clock::time_point* MatchEvent::parse_timstamp() const {
+    auto tp = new std::chrono::system_clock::time_point();
+    std::istringstream ss{*this->timestamp_txt_};
+    ss >> date::parse("%FT%TZ", *tp);
+    return tp;
+}
+
+MatchEvent::~MatchEvent() {
+    delete this->maker_order_id_;
+    delete this->taker_order_id_;
+    delete this->timestamp_txt_;
+}

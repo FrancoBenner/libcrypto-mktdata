@@ -16,9 +16,11 @@
 #define CRYPTO_MKTDATA_CORE_H
 
 #include <experimental/optional>
+#include <functional>
 #include <list>
 #include <ostream>
 
+#include <boost/algorithm/string.hpp>
 #include <boost/assign.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
@@ -157,8 +159,10 @@ namespace cloudwall::core::marketdata {
         OnRawFeedMessageCallback callback_;
     };
 
-    double json_string_to_double(rapidjson::GenericObject<true, rapidjson::GenericValue<rapidjson::UTF8<char>>> doc,
+    double json_string_to_double(rapidjson::GenericObject<true, rapidjson::GenericValue<rapidjson::UTF8<char>>> json,
             const char* field_name);
+
+    double json_string_to_double(const rapidjson::Document& json, const char* field_name);
 }
 
 #endif //CRYPTO_MKTDATA_CORE_H
