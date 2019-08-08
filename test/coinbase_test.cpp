@@ -73,6 +73,16 @@ TEST(ProductStatusEvent, parse) {
     ASSERT_EQ(48, event.get_products().size());
     ASSERT_EQ("ZEC-BTC", first->get_id());
     ASSERT_EQ("ZEC", first->get_currency_pair().get_base_ccy().get_ccy_code());
+    ASSERT_DOUBLE_EQ(0.01, first->get_base_min_size());
+    ASSERT_DOUBLE_EQ(1500, first->get_base_max_size());
+    ASSERT_DOUBLE_EQ(0.0001, first->get_base_increment());
+    ASSERT_DOUBLE_EQ(0.000001, first->get_quote_increment());
+    ASSERT_DOUBLE_EQ(0.001, first->get_min_market_funds());
+    ASSERT_DOUBLE_EQ(30, first->get_max_market_funds());
+    ASSERT_FALSE(first->is_margin_enabled());
+    ASSERT_FALSE(first->is_cancel_only());
+    ASSERT_TRUE(first->is_limit_only());
+    ASSERT_FALSE(first->is_post_only());
     ASSERT_EQ("online", first->get_status());
     ASSERT_EQ("", first->get_status_message());
 }

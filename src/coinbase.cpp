@@ -13,13 +13,14 @@
 // limitations under the License.
 
 #include <cloudwall/crypto-mktdata/coinbase.h>
-#include <iostream>
+
 #include <sstream>
 
 using namespace cloudwall::coinbase::marketdata;
 
 using cloudwall::core::marketdata::Channel;
 using cloudwall::core::marketdata::RawFeedMessage;
+using cloudwall::core::marketdata::json_string_to_double;
 
 CoinbaseRawFeedClient::CoinbaseRawFeedClient(const Subscription& subscription,
         const OnRawFeedMessageCallback& callback) : RawFeedClient(new ix::WebSocket(), callback) {
@@ -104,6 +105,17 @@ ProductStatus::ProductStatus(rapidjson::Value::ConstValueIterator product_json_i
 
     this->id_ = new std::string(product_json["id"].GetString());
     this->ccy_pair_ = new CurrencyPair(base_ccy, quote_ccy);
+    this->base_min_size_ = json_string_to_double(product_json, "base_min_size");
+    this->base_max_size_ = json_string_to_double(product_json, "base_max_size");
+    this->base_increment_ = json_string_to_double(product_json, "base_increment");
+    this->quote_increment_ = json_string_to_double(product_json, "quote_increment");
+    this->min_market_funds_ = json_string_to_double(product_json, "min_market_funds");
+    this->max_market_funds_ = json_string_to_double(product_json, "max_market_funds");
+    this->margin_enabled_ = product_json["margin_enabled"].GetBool();
+    this->limit_only_ = product_json["limit_only"].GetBool();
+    this->cancel_only_ = product_json["cancel_only"].GetBool();
+    this->post_only_ = product_json["post_only"].GetBool();
+
     this->status_ = new std::string(product_json["status"].GetString());
     this->status_message_ = new std::string(product_json["status_message"].GetString());
 }

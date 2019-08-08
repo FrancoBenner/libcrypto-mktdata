@@ -20,6 +20,9 @@
 #include <ostream>
 
 #include <boost/assign.hpp>
+#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/phoenix_core.hpp>
+#include <boost/spirit/include/phoenix_operator.hpp>
 #include <fmt/core.h>
 #include <ixwebsocket/IXWebSocket.h>
 #include <ixwebsocket/IXSocket.h>
@@ -124,7 +127,7 @@ namespace cloudwall::core::marketdata {
             return raw_json_;
         }
 
-        ~RawFeedMessage();
+        ~RawFeedMessage() = default;
     private:
         std::string raw_json_;
     };
@@ -153,6 +156,9 @@ namespace cloudwall::core::marketdata {
         ix::WebSocket *websocket_;
         OnRawFeedMessageCallback callback_;
     };
+
+    double json_string_to_double(rapidjson::GenericObject<true, rapidjson::GenericValue<rapidjson::UTF8<char>>> doc,
+            const char* field_name);
 }
 
 #endif //CRYPTO_MKTDATA_CORE_H

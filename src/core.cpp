@@ -14,6 +14,7 @@
 
 #include <cloudwall/crypto-mktdata/coinbase.h>
 #include <sstream>
+#include <cloudwall/crypto-mktdata/core.h>
 
 using namespace cloudwall::core::marketdata;
 
@@ -30,4 +31,10 @@ Subscription::Subscription(const std::list<Channel>& channels): channels_(channe
 RawFeedMessage::RawFeedMessage(const std::string &raw_json) : raw_json_(raw_json) {
 }
 
-RawFeedMessage::~RawFeedMessage() = default;
+double cloudwall::core::marketdata::json_string_to_double(
+        rapidjson::GenericObject<true, rapidjson::GenericValue<rapidjson::UTF8<char>>> doc, const char* field_name) {
+    const char* val_txt = doc[field_name].GetString();
+    double val = 0.0;
+    boost::spirit::qi::parse(val_txt, &val_txt[strlen(val_txt)], boost::spirit::qi::double_, val);
+    return val;
+}
