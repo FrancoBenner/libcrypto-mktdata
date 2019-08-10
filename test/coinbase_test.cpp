@@ -137,3 +137,27 @@ TEST(CoinbaseEventClient, product_status_only) {
     client.disconnect();
     ASSERT_TRUE(*msg_count > 0);
 }
+
+TEST(CoinbaseEventClient, matches_only) {
+    auto ccy_pair = CurrencyPair(Currency("BTC"), Currency("USD"));
+    std::list<Channel> channels({
+            Channel("match", { })
+    });
+    auto sub = Subscription(channels);
+    int counter = 0;
+    const OnCoinbaseEventCallback& callback = [](const CoinbaseEvent& event) {
+      if (CoinbaseEvent::EventType::match == event.getCoinbaseEventType()) {
+          const MatchEvent& specific = static_cast<const MatchEvent&>(event);
+          ASSERT_EQ("BTC", specific.get_currency_pair().get_base_ccy().get_ccy_code());
+          ASSERT_EQ("USD", specific.get_currency_pair().get_quote_ccy().get_ccy_code());
+      } else {
+          FAIL();
+      }
+    };
+    auto client = CoinbaseEventClient(sub, callback);
+    client.connect();
+    for (int i = 0; i < 5; i++) {
+        std::this_thread::sleep_for(1s);
+    }
+    client.disconnect();
+}
