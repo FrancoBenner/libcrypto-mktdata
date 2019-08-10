@@ -87,8 +87,12 @@ CoinbaseEventClient::CoinbaseEventClient(const Subscription& subscription, const
         auto d = rapidjson::Document();
         const auto& raw_json = message.get_raw_json();
         d.Parse(raw_json.c_str());
-        if (d["type"] == "status") {
+
+        auto event_type = d["type"].GetString();
+        if (strncmp("status", event_type, 6) == 0) {
             callback(ProductStatusEvent(d));
+        } else if (strncmp("match", event_type, 5) == 0) {
+            callback(MatchEvent(d));
         }
     };
     this->raw_feed_client_ = new CoinbaseRawFeedClient(subscription, raw_callback);
