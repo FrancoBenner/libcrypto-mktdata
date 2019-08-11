@@ -93,6 +93,8 @@ CoinbaseEventClient::CoinbaseEventClient(const Subscription& subscription, const
             callback(ProductStatusEvent(d));
         } else if (strncmp("match", event_type, 5) == 0) {
             callback(MatchEvent(d));
+        } else if (strncmp("ticker", event_type, 6) == 0) {
+            callback(TickerEvent(d));
         }
     };
     this->raw_feed_client_ = new CoinbaseRawFeedClient(subscription, raw_callback);
@@ -189,4 +191,73 @@ MatchEvent::~MatchEvent() {
     delete this->maker_order_id_;
     delete this->taker_order_id_;
     delete this->timestamp_txt_;
+}
+
+TickerEvent::TickerEvent(const rapidjson::Document& json) {
+    if (json.HasMember("trade_id")) {
+        this->last_trade_id_ = std::move(std::experimental::optional<long>(json["trade_id"].GetInt64()));
+    } else {
+        this->last_trade_id_ = std::experimental::nullopt;
+    }
+
+    this->sequence_num_ = json["sequence"].GetInt64();
+
+    this->best_bid_ = json_string_to_double(json, "best_bid");
+    this->best_ask_ = json_string_to_double(json, "best_ask");
+    this->open_24h_ = json_string_to_double(json, "open_24h");
+    this->high_24h_ = json_string_to_double(json, "high_24h");
+    this->low_24h_ = json_string_to_double(json, "low_24h");
+    this->volume_24h_ = json_string_to_double(json, "volume_24h");
+    this->volume_30d_ = json_string_to_double(json, "volume_30d");
+
+    if (json.HasMember("last_size")) {
+        auto last_size = json_string_to_double(json, "last_size");
+        this->last_size_ = std::move(std::experimental::optional<double>(last_size));
+    } else {
+        this->last_size_ = std::experimental::nullopt;
+    }
+    this->last_price_ = json_string_to_double(json, "price");
+
+    if (json.HasMember("time")) {
+        auto timestamp_txt = new std::string(json["time"].GetString());
+        this->timestamp_txt_ = std::move(std::experimental::optional<std::string*>(timestamp_txt));
+    } else {
+        this->timestamp_txt_ = std::experimental::nullopt;
+    }
+
+    // look up Side enum by name
+    if (json.HasMember("side")) {
+        auto side_txt = json["side"].GetString();
+        this->last_trade_side_ = std::move(std::experimental::optional<Side*>(&kSideByName[side_txt]));
+    } else {
+        this->last_trade_side_ = std::experimental::nullopt;
+    }
+
+    // same as above, we should cache the parsed CurrencyPair in a map for performance
+    auto product_id = json["product_id"].GetString();
+    std::vector<std::string> product_id_parts;
+    boost::split(product_id_parts, product_id, [](wchar_t ch) -> bool { return ch == (wchar_t) '-'; });
+    std::string base_ccy_txt = product_id_parts[0];
+    std::string quote_ccy_txt = product_id_parts[1];
+    Currency base_ccy = Currency(base_ccy_txt);
+    Currency quote_ccy = Currency(quote_ccy_txt);
+    this->ccy_pair_ = new CurrencyPair(base_ccy, quote_ccy);
+}
+
+const std::chrono::system_clock::time_point* TickerEvent::parse_timstamp() const {
+    if (!this->timestamp_txt_) {
+        return nullptr;
+    } else {
+        auto tp = new std::chrono::system_clock::time_point();
+        std::istringstream ss{**this->timestamp_txt_};
+        ss >> date::parse("%FT%TZ", *tp);
+        return tp;
+    }
+}
+
+TickerEvent::~TickerEvent() {
+    delete this->ccy_pair_;
+    if (this->timestamp_txt_) {
+        delete this->timestamp_txt_.value();
+    }
 }

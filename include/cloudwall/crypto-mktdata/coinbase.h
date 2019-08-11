@@ -237,18 +237,16 @@ namespace cloudwall::coinbase::marketdata {
     /// @brief event corresponding to the "ticker" channel, which has top-of-book and current volumes, 24H open/high/low
     /// and last trade price and size; this lower-frequency channel may be useful for applications that don't need
     /// to consume top N levels or full book-type marketdata
-    class TickerEvent : CoinbaseEvent {
+    class TickerEvent : public CoinbaseEvent {
     public:
-        explicit TickerEvent(const std::string& raw_json);
-
         explicit TickerEvent(const rapidjson::Document& json);
 
         [[nodiscard]] EventType getCoinbaseEventType() const override {
             return EventType::ticker;
         }
 
-        [[nodiscard]] long get_sequence_id() const {
-            return sequence_id_;
+        [[nodiscard]] long get_sequence_number() const {
+            return sequence_num_;
         }
 
         [[nodiscard]] const CurrencyPair& get_currency_pair() const {
@@ -259,31 +257,27 @@ namespace cloudwall::coinbase::marketdata {
             return best_bid_;
         }
 
-        [[nodiscard]] std::experimental::optional<double> get_best_bid_size() const {
-            return std::experimental::nullopt;
-        }
-
         [[nodiscard]] double get_best_ask_price() const {
             return best_ask_;
-        }
-
-        [[nodiscard]] std::experimental::optional<double> get_best_ask_size() const {
-            return std::experimental::nullopt;
         }
 
         [[nodiscard]] double get_spread() const {
             return get_best_ask_price() - get_best_bid_price();
         }
 
-        [[nodiscard]] long get_last_trade_id() const {
+        [[nodiscard]] const std::experimental::optional<long>& get_last_trade_id() const {
             return last_trade_id_;
+        }
+
+        [[nodiscard]] const std::experimental::optional<Side*>& get_last_trade_side() const {
+            return last_trade_side_;
         }
 
         [[nodiscard]] double get_last_price() const {
             return last_price_;
         }
 
-        [[nodiscard]] double get_last_size() const {
+        [[nodiscard]] const std::experimental::optional<double>& get_last_size() const {
             return last_size_;
         }
 
@@ -307,23 +301,24 @@ namespace cloudwall::coinbase::marketdata {
             return volume_30d_;
         }
 
-        [[nodiscard]] const std::string& get_timestamp_unparsed() const {
-            return *timestamp_txt_;
+        [[nodiscard]] const std::experimental::optional<std::string*>& get_unparsed_timestamp() const {
+            return timestamp_txt_;
         }
 
-        [[nodiscard]] const std::chrono::system_clock::time_point& parse_timstamp() const;
+        [[nodiscard]] const std::chrono::system_clock::time_point* parse_timstamp() const;
 
         ~TickerEvent();
     private:
-        long sequence_id_;
+        long sequence_num_;
         CurrencyPair* ccy_pair_;
 
         double best_bid_;
         double best_ask_;
 
-        long last_trade_id_;
+        std::experimental::optional<long> last_trade_id_;
+        std::experimental::optional<Side*> last_trade_side_;
         double last_price_;
-        double last_size_;
+        std::experimental::optional<double> last_size_;
 
         double open_24h_;
         double high_24h_;
@@ -331,9 +326,7 @@ namespace cloudwall::coinbase::marketdata {
         double volume_24h_;
         double volume_30d_;
 
-        std::string* timestamp_txt_;
-
-        void init(const rapidjson::Document& json);
+        std::experimental::optional<std::string*> timestamp_txt_;
     };
 }
 
