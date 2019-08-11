@@ -18,7 +18,6 @@
 #include <chrono>
 #include <thread>
 
-#include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <gtest/gtest.h>
 
@@ -123,8 +122,8 @@ TEST(CoinbaseEventClient, product_status_only) {
     const OnCoinbaseEventCallback& callback = [msg_count](const CoinbaseEvent& event) {
       if (CoinbaseEvent::EventType::status == event.getCoinbaseEventType()) {
           (*msg_count)++;
-          const ProductStatusEvent& specific = static_cast<const ProductStatusEvent&>(event);
-          ASSERT_TRUE(specific.get_products().size() > 0);
+          auto specific = dynamic_cast<const ProductStatusEvent&>(event);
+          ASSERT_TRUE(!specific.get_products().empty());
       } else {
           FAIL();
       }
@@ -144,10 +143,9 @@ TEST(CoinbaseEventClient, matches_only) {
             Channel("match", { })
     });
     auto sub = Subscription(channels);
-    int counter = 0;
     const OnCoinbaseEventCallback& callback = [](const CoinbaseEvent& event) {
       if (CoinbaseEvent::EventType::match == event.getCoinbaseEventType()) {
-          const MatchEvent& specific = static_cast<const MatchEvent&>(event);
+          auto specific = dynamic_cast<const MatchEvent&>(event);
           ASSERT_EQ("BTC", specific.get_currency_pair().get_base_ccy().get_ccy_code());
           ASSERT_EQ("USD", specific.get_currency_pair().get_quote_ccy().get_ccy_code());
       } else {
