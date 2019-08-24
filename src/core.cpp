@@ -23,7 +23,7 @@ Currency::Currency(const std::string& ccy_code) : ccy_code_(ccy_code) {}
 CurrencyPair::CurrencyPair(const Currency& base_ccy, const Currency& quote_ccy)
         : base_ccy_(base_ccy), quote_ccy_(quote_ccy) { }
 
-Channel::Channel(const std::string &name, const std::experimental::optional<CurrencyPair> &ccy_pair)
+Channel::Channel(const std::string &name, const std::optional<CurrencyPair> &ccy_pair)
         : name_(name), ccy_pair_(ccy_pair) { }
 
 Subscription::Subscription(const std::list<Channel>& channels): channels_(channels) { }

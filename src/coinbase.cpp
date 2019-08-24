@@ -195,9 +195,9 @@ MatchEvent::~MatchEvent() {
 
 TickerEvent::TickerEvent(const rapidjson::Document& json) {
     if (json.HasMember("trade_id")) {
-        this->last_trade_id_ = std::move(std::experimental::optional<long>(json["trade_id"].GetInt64()));
+        this->last_trade_id_ = std::move(std::optional<long>(json["trade_id"].GetInt64()));
     } else {
-        this->last_trade_id_ = std::experimental::nullopt;
+        this->last_trade_id_ = std::nullopt;
     }
 
     this->sequence_num_ = json["sequence"].GetInt64();
@@ -212,25 +212,25 @@ TickerEvent::TickerEvent(const rapidjson::Document& json) {
 
     if (json.HasMember("last_size")) {
         auto last_size = json_string_to_double(json, "last_size");
-        this->last_size_ = std::move(std::experimental::optional<double>(last_size));
+        this->last_size_ = std::move(std::optional<double>(last_size));
     } else {
-        this->last_size_ = std::experimental::nullopt;
+        this->last_size_ = std::nullopt;
     }
     this->last_price_ = json_string_to_double(json, "price");
 
     if (json.HasMember("time")) {
         auto timestamp_txt = new std::string(json["time"].GetString());
-        this->timestamp_txt_ = std::move(std::experimental::optional<std::string*>(timestamp_txt));
+        this->timestamp_txt_ = std::move(std::optional<std::string*>(timestamp_txt));
     } else {
-        this->timestamp_txt_ = std::experimental::nullopt;
+        this->timestamp_txt_ = std::nullopt;
     }
 
     // look up Side enum by name
     if (json.HasMember("side")) {
         auto side_txt = json["side"].GetString();
-        this->last_trade_side_ = std::move(std::experimental::optional<Side*>(&kSideByName[side_txt]));
+        this->last_trade_side_ = std::move(std::optional<Side*>(&kSideByName[side_txt]));
     } else {
-        this->last_trade_side_ = std::experimental::nullopt;
+        this->last_trade_side_ = std::nullopt;
     }
 
     // same as above, we should cache the parsed CurrencyPair in a map for performance

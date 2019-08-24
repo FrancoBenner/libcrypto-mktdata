@@ -265,11 +265,11 @@ namespace cloudwall::coinbase::marketdata {
             return get_best_ask_price() - get_best_bid_price();
         }
 
-        [[nodiscard]] const std::experimental::optional<long>& get_last_trade_id() const {
+        [[nodiscard]] const std::optional<long>& get_last_trade_id() const {
             return last_trade_id_;
         }
 
-        [[nodiscard]] const std::experimental::optional<Side*>& get_last_trade_side() const {
+        [[nodiscard]] const std::optional<Side*>& get_last_trade_side() const {
             return last_trade_side_;
         }
 
@@ -277,7 +277,7 @@ namespace cloudwall::coinbase::marketdata {
             return last_price_;
         }
 
-        [[nodiscard]] const std::experimental::optional<double>& get_last_size() const {
+        [[nodiscard]] const std::optional<double>& get_last_size() const {
             return last_size_;
         }
 
@@ -301,7 +301,7 @@ namespace cloudwall::coinbase::marketdata {
             return volume_30d_;
         }
 
-        [[nodiscard]] const std::experimental::optional<std::string*>& get_unparsed_timestamp() const {
+        [[nodiscard]] const std::optional<std::string*>& get_unparsed_timestamp() const {
             return timestamp_txt_;
         }
 
@@ -315,10 +315,10 @@ namespace cloudwall::coinbase::marketdata {
         double best_bid_;
         double best_ask_;
 
-        std::experimental::optional<long> last_trade_id_;
-        std::experimental::optional<Side*> last_trade_side_;
+        std::optional<long> last_trade_id_;
+        std::optional<Side*> last_trade_side_;
         double last_price_;
-        std::experimental::optional<double> last_size_;
+        std::optional<double> last_size_;
 
         double open_24h_;
         double high_24h_;
@@ -326,7 +326,7 @@ namespace cloudwall::coinbase::marketdata {
         double volume_24h_;
         double volume_30d_;
 
-        std::experimental::optional<std::string*> timestamp_txt_;
+        std::optional<std::string*> timestamp_txt_;
     };
 }
 

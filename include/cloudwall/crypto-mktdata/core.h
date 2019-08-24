@@ -15,10 +15,10 @@
 #ifndef CRYPTO_MKTDATA_CORE_H
 #define CRYPTO_MKTDATA_CORE_H
 
-#include <experimental/optional>
 #include <functional>
 #include <list>
 #include <ostream>
+#include <optional>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/assign.hpp>
@@ -92,18 +92,18 @@ namespace cloudwall::core::marketdata {
     class Channel {
     public:
         explicit Channel(const std::string& name,
-                         const std::experimental::optional<CurrencyPair>& product_id = std::experimental::nullopt);
+                         const std::optional<CurrencyPair>& product_id = std::nullopt);
 
         [[nodiscard]] const std::string& get_name() const {
             return name_;
         }
 
-        [[nodiscard]] const std::experimental::optional<CurrencyPair>& get_ccy_pair() const {
+        [[nodiscard]] const std::optional<CurrencyPair>& get_ccy_pair() const {
             return ccy_pair_;
         }
     private:
         std::string name_;
-        std::experimental::optional<CurrencyPair> ccy_pair_;
+        std::optional<CurrencyPair> ccy_pair_;
     };
 
     /// @brief a composite subscription to one or more channels
