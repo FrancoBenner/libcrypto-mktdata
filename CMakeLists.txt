@@ -14,8 +14,8 @@ conan_add_remote(NAME bincrafters INDEX 1
 conan_add_remote(NAME LunarWatcher INDEX 2
         URL https://api.bintray.com/conan/oliviazoe0/conan-packages)
 conan_cmake_run(REQUIRES boost/1.70.0@conan/stable
-                         fmt/5.3.0@bincrafters/stable
                          date/2.4.1@bincrafters/stable
+                         fmt/5.3.0@bincrafters/stable
                          rapidjson/1.1.0@bincrafters/stable
                          spdlog/1.3.1@bincrafters/stable
                          gtest/1.8.1@bincrafters/stable
