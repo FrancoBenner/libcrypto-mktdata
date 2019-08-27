@@ -14,11 +14,11 @@ conan_cmake_run(REQUIRES boost/1.70.0@conan/stable
                          rapidjson/1.1.0@bincrafters/stable
                          spdlog/1.3.1@bincrafters/stable
                          gtest/1.8.1@bincrafters/stable
+                         OpenSSL/1.1.1d@conan/stable
+                         zlib/1.2.9@conan/stable
         BASIC_SETUP BUILD missing)
 
 find_package(IXWebSocket REQUIRED)
-find_package(OpenSSL REQUIRED)
-find_package(ZLIB REQUIRED)
 find_package(Date REQUIRED)
 
 set(LIBCRYPTOMKTDATA_SOURCES
@@ -42,8 +42,8 @@ set(LIBCRYPTOMKTDATA_HEADERS
         )
 
 
-include_directories(include ${LIBIXWEBSOCKET_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR})
-set(LIBS ${LIBS} ${CONAN_LIBS} ${LIBIXWEBSOCKET_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES})
+include_directories(include ${LIBIXWEBSOCKET_INCLUDE_DIR})
+set(LIBS ${LIBS} ${CONAN_LIBS} ${LIBIXWEBSOCKET_LIBRARIES})
 list(REMOVE_ITEM LIBS boost_unit_test_framework)
 
 add_library(libcrypto-mktdata ${LIBCRYPTOMKTDATA_SOURCES} ${LIBCRYPTOMKTDATA_HEADERS})
