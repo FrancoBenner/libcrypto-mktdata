@@ -9,8 +9,11 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
 include(conan.cmake)
 
+conan_add_remote(NAME bincrafters INDEX 1
+        URL https://api.bintray.com/conan/bincrafters/public-conan)
 conan_cmake_run(REQUIRES boost/1.70.0@conan/stable
                          fmt/5.3.0@bincrafters/stable
+                         date/2.4.1@bincrafters/stable
                          rapidjson/1.1.0@bincrafters/stable
                          spdlog/1.3.1@bincrafters/stable
                          gtest/1.8.1@bincrafters/stable
@@ -18,7 +21,6 @@ conan_cmake_run(REQUIRES boost/1.70.0@conan/stable
         BASIC_SETUP BUILD missing)
 
 find_package(IXWebSocket REQUIRED)
-find_package(Date REQUIRED)
 
 set(LIBCRYPTOMKTDATA_SOURCES
         src/core.cpp
