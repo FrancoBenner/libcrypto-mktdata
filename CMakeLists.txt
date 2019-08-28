@@ -13,14 +13,14 @@ conan_add_remote(NAME bincrafters INDEX 1
         URL https://api.bintray.com/conan/bincrafters/public-conan)
 conan_add_remote(NAME LunarWatcher INDEX 2
         URL https://api.bintray.com/conan/oliviazoe0/conan-packages)
-conan_cmake_run(REQUIRES boost/1.70.0@conan/stable
+conan_cmake_run(REQUIRES boost/1.69.0@conan/stable
                          date/2.4.1@bincrafters/stable
                          fmt/5.3.0@bincrafters/stable
+                         gtest/1.8.1@bincrafters/stable
                          rapidjson/1.1.0@bincrafters/stable
                          spdlog/1.3.1@bincrafters/stable
-                         gtest/1.8.1@bincrafters/stable
+                         websocketpp/0.8.1@bincrafters/stable
                          IXWebSocket/5.0.6@LunarWatcher/stable
-                         OpenSSL/1.1.1d@conan/stable
         BASIC_SETUP BUILD missing)
 
 set(LIBCRYPTOMKTDATA_SOURCES
@@ -43,15 +43,18 @@ set(LIBCRYPTOMKTDATA_HEADERS
         include/cloudwall/crypto-mktdata/binance.h
         )
 
-
-include_directories(include ${LIBIXWEBSOCKET_INCLUDE_DIR})
-set(LIBS ${LIBS} ${CONAN_LIBS} ${LIBIXWEBSOCKET_LIBRARIES})
+include_directories(include})
+set(LIBS ${LIBS} ${CONAN_LIBS})
 list(REMOVE_ITEM LIBS boost_unit_test_framework)
 
 add_library(libcrypto-mktdata ${LIBCRYPTOMKTDATA_SOURCES} ${LIBCRYPTOMKTDATA_HEADERS})
 
 add_executable(libcrypto-mktdata_test test/core_test.cpp test/coinbase_test.cpp test/bitmex_test.cpp
         test/bitstamp_test.cpp test/kraken_test.cpp test/bitfinex_test.cpp test/binance_test.cpp)
+
+add_executable(print_client_tls src/print_client_tls.cpp)
+target_link_libraries(print_client_tls ${LIBS})
+
 target_link_libraries(libcrypto-mktdata_test libcrypto-mktdata ${LIBS})
 if (APPLE)
     target_link_libraries(libcrypto-mktdata_test "-framework foundation" "-framework security")
