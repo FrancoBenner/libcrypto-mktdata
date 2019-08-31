@@ -1,8 +1,10 @@
-#include <boost/filesystem/fstream.hpp>
+#include <boost/filesystem.hpp>
 #include <websocketpp/config/asio_client.hpp>
 #include <websocketpp/client.hpp>
 
 #include <iostream>
+#include <regex>
+#include <string>
 
 typedef websocketpp::client<websocketpp::config::asio_tls_client> client;
 typedef websocketpp::lib::shared_ptr<websocketpp::lib::asio::ssl::context> context_ptr;
@@ -77,7 +79,10 @@ bool verify_common_name(const char * hostname, X509 * cert) {
     }
 
     // Compare expected hostname with the CN
-    return (strcasecmp(hostname, common_name_str) == 0);
+    std::string common_name_pattern = common_name_str;
+    common_name_pattern = std::regex_replace( common_name_pattern, std::regex("\\*"), "[^.]+");
+    auto common_name_regex = std::regex(common_name_pattern);
+    return regex_match(hostname, common_name_regex);
 }
 
 /**
@@ -163,9 +168,12 @@ context_ptr on_tls_init(const char * hostname, websocketpp::connection_hdl) {
         ctx->set_verify_callback(bind(&verify_certificate, hostname, ::_1, ::_2));
 
         // Here we load the CA certificates of all CA's that this client trusts.
-        boost::filesystem::path src_path(__FILE__);
-        boost::filesystem::path pem_path = src_path.remove_filename().append("coinbase.pem");
-        ctx->load_verify_file(pem_path.string());
+        boost::filesystem::path pem_path = boost::filesystem::path("/etc/ssl/certs/ca-certificates.crt");
+        if (boost::filesystem::exists(pem_path)) {
+            ctx->load_verify_file(pem_path.string());
+        } else {
+            ctx->load_verify_file("/etc/ssl/cert.pem");
+        }
     } catch (std::exception& e) {
         std::cout << e.what() << std::endl;
     }
