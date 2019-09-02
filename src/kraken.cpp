@@ -14,7 +14,6 @@
 
 #include <cloudwall/crypto-mktdata/kraken.h>
 #include <iostream>
-#include <sstream>
 
 using namespace cloudwall::kraken::marketdata;
 

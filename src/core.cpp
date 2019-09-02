@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <cloudwall/crypto-mktdata/coinbase.h>
-#include <sstream>
 #include <cloudwall/crypto-mktdata/core.h>
+
+#include <sstream>
 
 using namespace cloudwall::core::marketdata;
 

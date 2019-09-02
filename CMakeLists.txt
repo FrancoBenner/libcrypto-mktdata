@@ -30,6 +30,7 @@ set(LIBCRYPTOMKTDATA_SOURCES
         src/kraken.cpp
         src/bitfinex.cpp
         src/binance.cpp
+        src/websocket_client.cpp
         )
 
 set(LIBCRYPTOMKTDATA_HEADERS
@@ -40,7 +41,7 @@ set(LIBCRYPTOMKTDATA_HEADERS
         include/cloudwall/crypto-mktdata/kraken.h
         include/cloudwall/crypto-mktdata/bitfinex.h
         include/cloudwall/crypto-mktdata/binance.h
-        )
+        include/cloudwall/crypto-mktdata/websocket_client.h)
 
 include_directories(include})
 set(LIBS ${LIBS} ${CONAN_LIBS})
@@ -52,7 +53,7 @@ add_executable(libcrypto-mktdata_test test/core_test.cpp test/coinbase_test.cpp 
         test/bitstamp_test.cpp test/kraken_test.cpp test/bitfinex_test.cpp test/binance_test.cpp)
 
 add_executable(print_client_tls src/print_client_tls.cpp)
-target_link_libraries(print_client_tls ${LIBS})
+target_link_libraries(print_client_tls libcrypto-mktdata ${LIBS})
 
 target_link_libraries(libcrypto-mktdata_test libcrypto-mktdata ${LIBS})
 if (APPLE)

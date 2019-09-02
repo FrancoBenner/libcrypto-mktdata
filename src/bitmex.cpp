@@ -14,7 +14,6 @@
 
 #include <cloudwall/crypto-mktdata/bitmex.h>
 #include <iostream>
-#include <sstream>
 
 using namespace cloudwall::bitmex::marketdata;
 using cloudwall::core::marketdata::Channel;
