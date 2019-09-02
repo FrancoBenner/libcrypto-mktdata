@@ -13,6 +13,27 @@ using websocketpp::lib::placeholders::_1;
 using websocketpp::lib::placeholders::_2;
 using websocketpp::lib::bind;
 
+void on_open(client* c, const websocketpp::connection_hdl& hdl) {
+    c->send(hdl, "{\n"
+                 "    \"type\": \"subscribe\",\n"
+                 "    \"product_ids\": [\n"
+                 "        \"ETH-USD\",\n"
+                 "        \"ETH-EUR\"\n"
+                 "    ],\n"
+                 "    \"channels\": [\n"
+                 "        \"matches\",\n"
+                 "        \"heartbeat\",\n"
+                 "        {\n"
+                 "            \"name\": \"ticker\",\n"
+                 "            \"product_ids\": [\n"
+                 "                \"ETH-BTC\",\n"
+                 "                \"ETH-USD\"\n"
+                 "            ]\n"
+                 "        }\n"
+                 "    ]\n"
+                 "}", websocketpp::frame::opcode::text);
+}
+
 void on_message(const websocketpp::connection_hdl&, const client::message_ptr& msg) {
     std::cout << msg->get_payload() << std::endl;
 }
@@ -150,7 +171,7 @@ bool verify_certificate(const char * hostname, bool preverified, boost::asio::ss
  * (websocketpp.org, for example).
  */
 context_ptr on_tls_init(const char * hostname, const websocketpp::connection_hdl&) {
-    context_ptr ctx = websocketpp::lib::make_shared<boost::asio::ssl::context>(boost::asio::ssl::context::sslv23);
+    context_ptr ctx = websocketpp::lib::make_shared<boost::asio::ssl::context>(boost::asio::ssl::context::tlsv12);
 
     try {
         ctx->set_options(boost::asio::ssl::context::default_workarounds | // NOLINT(hicpp-signed-bitwise)
@@ -192,6 +213,7 @@ int main(int argc, char* argv[]) {
 
         // Register our message handler
         c.set_message_handler(&on_message);
+        c.set_open_handler(bind(&on_open, &c, ::_1));
         c.set_tls_init_handler(bind(&on_tls_init, hostname.c_str(), ::_1));
 
         websocketpp::lib::error_code ec;
