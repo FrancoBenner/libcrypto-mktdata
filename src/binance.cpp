@@ -23,7 +23,7 @@ using cloudwall::core::marketdata::RawFeedMessage;
 
 BinanceRawFeedClient::BinanceRawFeedClient(const Subscription& subscription,
                                            const OnRawFeedMessageCallback& callback)
-            : RawFeedClient(new ix::WebSocket(), callback) {
+            : IXWebSocketRawFeedClient(new ix::WebSocket(), callback) {
 
     std::stringstream ss;
     ss << "wss://stream.binance.com:9443/stream?streams=";

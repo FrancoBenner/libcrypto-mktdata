@@ -52,11 +52,10 @@ TEST(CoinbaseProRawFeedClient, connect) {
         spdlog::info("Incoming message: {}", msg.get_raw_json());
         ASSERT_FALSE(msg.get_raw_json().empty());
     };
-    auto client = CoinbaseRawFeedClient(sub, callback);
+    auto ioc = new boost::asio::io_context();
+    auto client = CoinbaseRawFeedClient(ioc, sub, callback);
     client.connect();
-    for (int i = 0; i < 5; i++) {
-        std::this_thread::sleep_for(1s);
-    }
+    ioc->run_until(std::chrono::steady_clock::now() + std::chrono::seconds(5));
     client.disconnect();
     ASSERT_TRUE(*msg_count > 0);
 }
@@ -188,11 +187,10 @@ TEST(CoinbaseEventClient, product_status_only) {
           FAIL();
       }
     };
-    auto client = CoinbaseEventClient(sub, callback);
+    auto ioc = new boost::asio::io_context();
+    auto client = CoinbaseEventClient(ioc, sub, callback);
     client.connect();
-    for (int i = 0; i < 5; i++) {
-        std::this_thread::sleep_for(1s);
-    }
+    ioc->run_until(std::chrono::steady_clock::now() + std::chrono::seconds(5));
     client.disconnect();
     ASSERT_TRUE(*msg_count > 0);
 }
@@ -212,11 +210,10 @@ TEST(CoinbaseEventClient, matches_only) {
           FAIL();
       }
     };
-    auto client = CoinbaseEventClient(sub, callback);
+    auto ioc = new boost::asio::io_context();
+    auto client = CoinbaseEventClient(ioc, sub, callback);
     client.connect();
-    for (int i = 0; i < 5; i++) {
-        std::this_thread::sleep_for(1s);
-    }
+    ioc->run_until(std::chrono::steady_clock::now() + std::chrono::seconds(5));
     client.disconnect();
 }
 
@@ -238,11 +235,10 @@ TEST(CoinbaseEventClient, ticker_only) {
           FAIL();
       }
     };
-    auto client = CoinbaseEventClient(sub, callback);
+    auto ioc = new boost::asio::io_context();
+    auto client = CoinbaseEventClient(ioc, sub, callback);
     client.connect();
-    for (int i = 0; i < 5; i++) {
-        std::this_thread::sleep_for(1s);
-    }
+    ioc->run_until(std::chrono::steady_clock::now() + std::chrono::seconds(5));
     client.disconnect();
     ASSERT_TRUE(*msg_count > 0);
 }

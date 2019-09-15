@@ -22,7 +22,7 @@ using cloudwall::core::marketdata::RawFeedMessage;
 
 KrakenRawFeedClient::KrakenRawFeedClient(const Subscription& subscription,
                                          const OnRawFeedMessageCallback& callback)
-            : RawFeedClient(new ix::WebSocket(), callback) {
+            : IXWebSocketRawFeedClient(new ix::WebSocket(), callback) {
     std::string url("wss://ws.kraken.com/");
     websocket_->setUrl(url);
 

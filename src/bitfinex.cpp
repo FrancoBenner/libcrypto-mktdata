@@ -24,7 +24,7 @@ using cloudwall::core::marketdata::Channel;
 using cloudwall::core::marketdata::RawFeedMessage;
 
 BitfinexRawFeedClient::BitfinexRawFeedClient(const Subscription& subscription, const OnRawFeedMessageCallback& callback)
-        : RawFeedClient(new ix::WebSocket(), callback) {
+        : IXWebSocketRawFeedClient(new ix::WebSocket(), callback) {
     std::string url("wss://api-pub.bitfinex.com/ws/2");
     websocket_->setUrl(url);
 

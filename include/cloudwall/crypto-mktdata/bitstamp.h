@@ -17,14 +17,14 @@
 
 #include <cloudwall/crypto-mktdata/core.h>
 
+using cloudwall::core::marketdata::IXWebSocketRawFeedClient;
 using cloudwall::core::marketdata::OnRawFeedMessageCallback;
-using cloudwall::core::marketdata::RawFeedClient;
 using cloudwall::core::marketdata::Subscription;
 
 /// @brief Bitstamp websocket API v2
 /// @see https://www.bitstamp.net/websocket/v2/
 namespace cloudwall::bitstamp::marketdata {
-    class BitstampRawFeedClient : public RawFeedClient {
+    class BitstampRawFeedClient : public IXWebSocketRawFeedClient {
     public:
         BitstampRawFeedClient(const Subscription& subscription, const OnRawFeedMessageCallback& callback);
 

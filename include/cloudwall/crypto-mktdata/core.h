@@ -33,6 +33,8 @@
 #include <rapidjson/writer.h>
 #include <spdlog/spdlog.h>
 
+#include <cloudwall/crypto-mktdata/websocket_client.h>
+
 namespace cloudwall::core::marketdata {
     /// @brief a reference to a cryptocurrency (e.g. BTC) or fiat currency (e.g. USD)
     class Currency {
@@ -137,11 +139,45 @@ namespace cloudwall::core::marketdata {
     /// @brief callback function made every time a new message is received on a websocket channel
     using OnRawFeedMessageCallback = std::function<void(const RawFeedMessage&)>;
 
-    /// @brief common interface for a raw message feed client based on websockets
     class RawFeedClient {
     public:
-        RawFeedClient(ix::WebSocket* websocket, const OnRawFeedMessageCallback& callback)
-            : websocket_(websocket), callback_(callback) { }
+        explicit RawFeedClient(const OnRawFeedMessageCallback& callback) : callback_(callback) { }
+
+        virtual void connect() = 0;
+
+        virtual void disconnect() = 0;
+
+        ~RawFeedClient() = default;
+    protected:
+        OnRawFeedMessageCallback callback_;
+    };
+
+    /// @brief common interface for a raw message feed client based on cloudwall::websocket::Websocket
+    class WebsocketRawFeedClient : public RawFeedClient {
+    public:
+        WebsocketRawFeedClient(const OnRawFeedMessageCallback& callback)
+                : RawFeedClient(callback) { }
+
+        void connect() {
+            websocket_->connect();
+        }
+
+        void disconnect() {
+            websocket_->disconnect();
+        }
+
+        ~WebsocketRawFeedClient() {
+            delete websocket_;
+        }
+    protected:
+        cloudwall::websocket::Websocket *websocket_;
+    };
+
+    /// @brief common interface for a raw message feed client based on IXWebSockets
+    class IXWebSocketRawFeedClient : public RawFeedClient {
+    public:
+        IXWebSocketRawFeedClient(ix::WebSocket* websocket, const OnRawFeedMessageCallback& callback)
+            : RawFeedClient(callback), websocket_(websocket) { }
 
         void connect() {
             websocket_->start();
@@ -151,12 +187,11 @@ namespace cloudwall::core::marketdata {
             websocket_->stop();
         }
 
-        ~RawFeedClient() {
+        ~IXWebSocketRawFeedClient() {
             delete websocket_;
         }
     protected:
         ix::WebSocket *websocket_;
-        OnRawFeedMessageCallback callback_;
     };
 
     double json_string_to_double(rapidjson::GenericObject<true, rapidjson::GenericValue<rapidjson::UTF8<char>>> json,

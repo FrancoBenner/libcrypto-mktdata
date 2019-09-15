@@ -16,12 +16,12 @@
 #include <iostream>
 
 using namespace cloudwall::bitmex::marketdata;
+using cloudwall::core::marketdata::IXWebSocketRawFeedClient;
 using cloudwall::core::marketdata::Channel;
-using cloudwall::core::marketdata::RawFeedClient;
 using cloudwall::core::marketdata::RawFeedMessage;
 
 BitMexRawFeedClient::BitMexRawFeedClient(const Subscription& subscription, const OnRawFeedMessageCallback& callback)
-        : RawFeedClient(new ix::WebSocket(), callback) {
+        : IXWebSocketRawFeedClient(new ix::WebSocket(), callback) {
 
     std::string url("wss://www.bitmex.com/realtime/");
     websocket_->setUrl(url);

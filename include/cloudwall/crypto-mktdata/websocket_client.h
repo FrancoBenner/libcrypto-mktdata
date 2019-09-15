@@ -33,15 +33,19 @@ using websocketpp::lib::bind;
 namespace cloudwall::websocket {
     class SSLContext {
     public:
-        explicit SSLContext(const std::string &hostname) : hostname_(hostname) {
+        explicit SSLContext(const std::string *hostname) : hostname_(hostname) {
         }
 
         const std::string &get_hostname() const {
-            return hostname_;
+            return *hostname_;
+        }
+
+        ~SSLContext() {
+            delete hostname_;
         }
 
     private:
-        const std::string &hostname_;
+        const std::string *hostname_;
     };
 
     class WebsocketMessage {
@@ -59,7 +63,7 @@ namespace cloudwall::websocket {
 
     class Websocket {
     public:
-        Websocket(const std::string &uri, boost::asio::io_context *ioc, SSLContext *ssl_ctx);
+        Websocket(const std::string *uri, boost::asio::io_context *ioc, SSLContext *ssl_ctx);
 
         void set_on_open_callback(std::function<void(Websocket *)> callback);
 
@@ -74,7 +78,7 @@ namespace cloudwall::websocket {
         void disconnect();
 
     private:
-        const std::string &uri_;
+        const std::string *uri_;
         client *client_;
         client::connection_ptr conn_;
 

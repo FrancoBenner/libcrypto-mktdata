@@ -1,8 +1,8 @@
 #include <cloudwall/crypto-mktdata/websocket_client.h>
 
 int main(int argc, char* argv[]) {
-    std::string hostname = "ws-feed.pro.coinbase.com";
-    std::string uri = "wss://" + hostname;
+    auto hostname = new std::string("ws-feed.pro.coinbase.com");
+    auto uri = new std::string("wss://" + *hostname);
 
     auto ioc = new boost::asio::io_context();
     auto ssl_ctx = new cloudwall::websocket::SSLContext(hostname);

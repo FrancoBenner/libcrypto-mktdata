@@ -17,14 +17,14 @@
 
 #include <cloudwall/crypto-mktdata/core.h>
 
+using cloudwall::core::marketdata::IXWebSocketRawFeedClient;
 using cloudwall::core::marketdata::OnRawFeedMessageCallback;
-using cloudwall::core::marketdata::RawFeedClient;
 using cloudwall::core::marketdata::Subscription;
 
 /// @brief BitMEX websocket API
 /// @see https://www.bitmex.com/app/wsAPI
 namespace cloudwall::bitmex::marketdata {
-    class BitMexRawFeedClient : public RawFeedClient {
+    class BitMexRawFeedClient : public IXWebSocketRawFeedClient {
     public:
         BitMexRawFeedClient(const Subscription& subscription, const OnRawFeedMessageCallback& callback);
 

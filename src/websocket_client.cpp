@@ -114,7 +114,6 @@ context_ptr on_tls_init(const char * hostname, const websocketpp::connection_hdl
                          boost::asio::ssl::context::no_sslv3 |
                          boost::asio::ssl::context::single_dh_use);
 
-
         ctx->set_verify_mode(boost::asio::ssl::verify_peer);
         ctx->set_verify_callback(bind(&verify_certificate, hostname, ::_1, ::_2));
 
@@ -131,7 +130,7 @@ context_ptr on_tls_init(const char * hostname, const websocketpp::connection_hdl
     return ctx;
 }
 
-cloudwall::websocket::Websocket::Websocket(const std::string &uri, boost::asio::io_context *ioc, SSLContext *ssl_ctx)
+cloudwall::websocket::Websocket::Websocket(const std::string *uri, boost::asio::io_context *ioc, SSLContext *ssl_ctx)
         : uri_(uri) {
     this->client_ = new client();
     client_->set_access_channels(websocketpp::log::alevel::all);
@@ -163,7 +162,7 @@ void cloudwall::websocket::Websocket::set_on_close_callback(std::function<void(W
 
 void cloudwall::websocket::Websocket::connect() {
     websocketpp::lib::error_code ec;
-    conn_ = client_->get_connection(uri_, ec);
+    conn_ = client_->get_connection(*uri_, ec);
     client_->connect(conn_);
 }
 
