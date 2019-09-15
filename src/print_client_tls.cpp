@@ -11,8 +11,7 @@ int main(int argc, char* argv[]) {
         ws->send("{\n"
                  "    \"type\": \"subscribe\",\n"
                  "    \"product_ids\": [\n"
-                 "        \"ETH-USD\",\n"
-                 "        \"ETH-EUR\"\n"
+                 "        \"BTC-USD\"\n"
                  "    ],\n"
                  "    \"channels\": [\n"
                  "        \"matches\",\n"
@@ -20,8 +19,7 @@ int main(int argc, char* argv[]) {
                  "        {\n"
                  "            \"name\": \"ticker\",\n"
                  "            \"product_ids\": [\n"
-                 "                \"ETH-BTC\",\n"
-                 "                \"ETH-USD\"\n"
+                 "                \"BTC-USD\"\n"
                  "            ]\n"
                  "        }\n"
                  "    ]\n"
@@ -31,6 +29,9 @@ int main(int argc, char* argv[]) {
     ws.set_on_message_callback([](const cloudwall::websocket::Websocket* ws,
             const cloudwall::websocket::WebsocketMessage *msg) {
         std::cout << msg->get_payload() << std::endl;
+    });
+    ws.set_on_close_callback([](const cloudwall::websocket::Websocket* ws) {
+        std::cout << "closing ..." << std::endl;
     });
 
     ws.connect();

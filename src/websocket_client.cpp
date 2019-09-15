@@ -27,7 +27,10 @@ bool verify_subject_alternative_name(const char * hostname, X509 * cert) {
             break;
         }
         // Compare expected hostname with the CN
-        result = (strcasecmp(hostname, dns_name) == 0);
+        std::string common_name_pattern = dns_name;
+        common_name_pattern = std::regex_replace( common_name_pattern, std::regex("\\*"), "[^.]+");
+        auto common_name_regex = std::regex(common_name_pattern);
+        return regex_match(hostname, common_name_regex);
     }
     sk_GENERAL_NAME_pop_free(san_names, GENERAL_NAME_free);
 
