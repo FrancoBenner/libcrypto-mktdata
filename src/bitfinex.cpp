@@ -24,13 +24,9 @@ using cloudwall::core::marketdata::Channel;
 using cloudwall::core::marketdata::RawFeedMessage;
 
 BitfinexRawFeedClient::BitfinexRawFeedClient(const Subscription& subscription, const OnRawFeedMessageCallback& callback)
-        : IXWebSocketRawFeedClient(new ix::WebSocket(), callback) {
+        : RawFeedClient(new ix::WebSocket(), callback) {
     std::string url("wss://api-pub.bitfinex.com/ws/2");
     websocket_->setUrl(url);
-
-    // Optional heart beat, sent every 45 seconds when there is not any traffic
-    // to make sure that load balancers do not kill an idle connection.
-    websocket_->setHeartBeatPeriod(45);
 
     // Setup a callback to be fired when a message or an event (open, close, error) is received
     websocket_->setOnMessageCallback(

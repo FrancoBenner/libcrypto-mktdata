@@ -52,10 +52,11 @@ TEST(CoinbaseProRawFeedClient, connect) {
         spdlog::info("Incoming message: {}", msg.get_raw_json());
         ASSERT_FALSE(msg.get_raw_json().empty());
     };
-    auto ioc = new boost::asio::io_context();
-    auto client = CoinbaseRawFeedClient(ioc, sub, callback);
+    auto client = CoinbaseRawFeedClient(sub, callback);
     client.connect();
-    ioc->run_until(std::chrono::steady_clock::now() + std::chrono::seconds(5));
+    for (int i = 0; i < 5; i++) {
+        std::this_thread::sleep_for(1s);
+    }
     client.disconnect();
     ASSERT_TRUE(*msg_count > 0);
 }
@@ -108,7 +109,6 @@ TEST(MatchEvent, parse) {
     ASSERT_DOUBLE_EQ(0.01671111, event.get_size());
     ASSERT_DOUBLE_EQ(11730.37, event.get_price());
     ASSERT_EQ("2019-08-08T16:09:40.587000Z", event.get_unparsed_timestamp());
-    ASSERT_EQ(1565280580587000L, event.parse_timstamp()->time_since_epoch().count());
 }
 
 TEST(TickerEvent, parse) {
@@ -138,7 +138,6 @@ TEST(TickerEvent, parse) {
     ASSERT_DOUBLE_EQ(16759.18480858, event.get_volume_24h());
     ASSERT_DOUBLE_EQ(610078.3142738, event.get_volume_30d());
     ASSERT_EQ("2019-08-08T16:09:40.587000Z", *event.get_unparsed_timestamp().value());
-    ASSERT_EQ(1565280580587000L, event.parse_timstamp()->time_since_epoch().count());
 }
 
 TEST(TickerEvent, parse_no_trade) {
@@ -187,10 +186,11 @@ TEST(CoinbaseEventClient, product_status_only) {
           FAIL();
       }
     };
-    auto ioc = new boost::asio::io_context();
-    auto client = CoinbaseEventClient(ioc, sub, callback);
+    auto client = CoinbaseEventClient(sub, callback);
     client.connect();
-    ioc->run_until(std::chrono::steady_clock::now() + std::chrono::seconds(5));
+    for (int i = 0; i < 5; i++) {
+        std::this_thread::sleep_for(1s);
+    }
     client.disconnect();
     ASSERT_TRUE(*msg_count > 0);
 }
@@ -210,10 +210,11 @@ TEST(CoinbaseEventClient, matches_only) {
           FAIL();
       }
     };
-    auto ioc = new boost::asio::io_context();
-    auto client = CoinbaseEventClient(ioc, sub, callback);
+    auto client = CoinbaseEventClient(sub, callback);
     client.connect();
-    ioc->run_until(std::chrono::steady_clock::now() + std::chrono::seconds(5));
+    for (int i = 0; i < 5; i++) {
+        std::this_thread::sleep_for(1s);
+    }
     client.disconnect();
 }
 
@@ -235,10 +236,11 @@ TEST(CoinbaseEventClient, ticker_only) {
           FAIL();
       }
     };
-    auto ioc = new boost::asio::io_context();
-    auto client = CoinbaseEventClient(ioc, sub, callback);
+    auto client = CoinbaseEventClient(sub, callback);
     client.connect();
-    ioc->run_until(std::chrono::steady_clock::now() + std::chrono::seconds(5));
+    for (int i = 0; i < 5; i++) {
+        std::this_thread::sleep_for(1s);
+    }
     client.disconnect();
     ASSERT_TRUE(*msg_count > 0);
 }

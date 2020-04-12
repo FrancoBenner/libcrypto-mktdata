@@ -22,6 +22,8 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/assign.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/path.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
@@ -32,8 +34,6 @@
 #include <rapidjson/ostreamwrapper.h>
 #include <rapidjson/writer.h>
 #include <spdlog/spdlog.h>
-
-#include <cloudwall/crypto-mktdata/websocket_client.h>
 
 namespace cloudwall::core::marketdata {
     /// @brief a reference to a cryptocurrency (e.g. BTC) or fiat currency (e.g. USD)
@@ -139,45 +139,29 @@ namespace cloudwall::core::marketdata {
     /// @brief callback function made every time a new message is received on a websocket channel
     using OnRawFeedMessageCallback = std::function<void(const RawFeedMessage&)>;
 
+    /// @brief common interface for a raw message feed client based on websockets
     class RawFeedClient {
     public:
-        explicit RawFeedClient(const OnRawFeedMessageCallback& callback) : callback_(callback) { }
+        RawFeedClient(ix::WebSocket* websocket, const OnRawFeedMessageCallback& callback)
+            : websocket_(websocket), callback_(callback) {
 
-        virtual void connect() = 0;
+            // Optional heart beat, sent every 45 seconds when there is not any traffic
+            // to make sure that load balancers do not kill an idle connection.
+            websocket_->setHeartBeatPeriod(45);
 
-        virtual void disconnect() = 0;
+            // reconnection with exponential backoff
+            websocket_->enableAutomaticReconnection();
 
-        ~RawFeedClient() = default;
-    protected:
-        OnRawFeedMessageCallback callback_;
-    };
-
-    /// @brief common interface for a raw message feed client based on cloudwall::websocket::Websocket
-    class WebsocketRawFeedClient : public RawFeedClient {
-    public:
-        WebsocketRawFeedClient(const OnRawFeedMessageCallback& callback)
-                : RawFeedClient(callback) { }
-
-        void connect() {
-            websocket_->connect();
+            // turn on SSL certificate verification
+            ix::SocketTLSOptions socket_ops = ix::SocketTLSOptions();
+            boost::filesystem::path pem_path = boost::filesystem::path("/etc/ssl/certs/ca-certificates.crt");
+            if (boost::filesystem::exists(pem_path)) {
+                socket_ops.caFile = pem_path.string();
+            } else {
+                socket_ops.caFile = "/etc/ssl/cert.pem";
+            }
+            websocket_->setTLSOptions(socket_ops);
         }
-
-        void disconnect() {
-            websocket_->disconnect();
-        }
-
-        ~WebsocketRawFeedClient() {
-            delete websocket_;
-        }
-    protected:
-        cloudwall::websocket::Websocket *websocket_;
-    };
-
-    /// @brief common interface for a raw message feed client based on IXWebSockets
-    class IXWebSocketRawFeedClient : public RawFeedClient {
-    public:
-        IXWebSocketRawFeedClient(ix::WebSocket* websocket, const OnRawFeedMessageCallback& callback)
-            : RawFeedClient(callback), websocket_(websocket) { }
 
         void connect() {
             websocket_->start();
@@ -187,11 +171,12 @@ namespace cloudwall::core::marketdata {
             websocket_->stop();
         }
 
-        ~IXWebSocketRawFeedClient() {
+        ~RawFeedClient() {
             delete websocket_;
         }
     protected:
         ix::WebSocket *websocket_;
+        OnRawFeedMessageCallback callback_;
     };
 
     double json_string_to_double(rapidjson::GenericObject<true, rapidjson::GenericValue<rapidjson::UTF8<char>>> json,

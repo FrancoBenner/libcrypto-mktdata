@@ -22,9 +22,9 @@
 using cloudwall::core::marketdata::Currency;
 using cloudwall::core::marketdata::CurrencyPair;
 using cloudwall::core::marketdata::OnRawFeedMessageCallback;
+using cloudwall::core::marketdata::RawFeedClient;
 using cloudwall::core::marketdata::Side;
 using cloudwall::core::marketdata::Subscription;
-using cloudwall::core::marketdata::WebsocketRawFeedClient;
 
 /// @brief Coinbase Pro websocket API
 /// @see https://docs.pro.coinbase.com/
@@ -44,10 +44,9 @@ namespace cloudwall::coinbase::marketdata {
     using OnCoinbaseEventCallback = std::function<void(const CoinbaseEvent&)>;
 
     /// @brief lowest-level Coinbase Pro marketdata client which feeds back raw JSON strings
-    class CoinbaseRawFeedClient : public WebsocketRawFeedClient {
+    class CoinbaseRawFeedClient : public RawFeedClient {
     public:
-        CoinbaseRawFeedClient(boost::asio::io_context *ioc, const Subscription& subscription,
-                const OnRawFeedMessageCallback& callback);
+        CoinbaseRawFeedClient(const Subscription& subscription, const OnRawFeedMessageCallback& callback);
 
         ~CoinbaseRawFeedClient() = default;
     };
@@ -55,8 +54,7 @@ namespace cloudwall::coinbase::marketdata {
     /// @brief higher-level Coinbase Pro marketdata client which produces typed event objects
     class CoinbaseEventClient {
     public:
-        CoinbaseEventClient(boost::asio::io_context *ioc, const Subscription& subscription,
-                const OnCoinbaseEventCallback& callback);
+        CoinbaseEventClient(const Subscription& subscription, const OnCoinbaseEventCallback& callback);
 
         void connect() {
             this->raw_feed_client_->connect();

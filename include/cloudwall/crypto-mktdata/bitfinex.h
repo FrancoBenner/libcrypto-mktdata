@@ -17,14 +17,14 @@
 
 #include <cloudwall/crypto-mktdata/core.h>
 
-using cloudwall::core::marketdata::IXWebSocketRawFeedClient;
 using cloudwall::core::marketdata::OnRawFeedMessageCallback;
+using cloudwall::core::marketdata::RawFeedClient;
 using cloudwall::core::marketdata::Subscription;
 
 /// @brief Bitfinex websocket API
 /// @see https://docs.bitfinex.com/v2/docs/ws-general
 namespace cloudwall::bitfinex::marketdata {
-    class BitfinexRawFeedClient : public IXWebSocketRawFeedClient {
+    class BitfinexRawFeedClient : public RawFeedClient {
     public:
         BitfinexRawFeedClient(const Subscription& subscription, const OnRawFeedMessageCallback& callback);
 

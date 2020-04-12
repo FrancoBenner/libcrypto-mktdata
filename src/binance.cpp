@@ -23,7 +23,7 @@ using cloudwall::core::marketdata::RawFeedMessage;
 
 BinanceRawFeedClient::BinanceRawFeedClient(const Subscription& subscription,
                                            const OnRawFeedMessageCallback& callback)
-            : IXWebSocketRawFeedClient(new ix::WebSocket(), callback) {
+            : RawFeedClient(new ix::WebSocket(), callback) {
 
     std::stringstream ss;
     ss << "wss://stream.binance.com:9443/stream?streams=";
@@ -37,10 +37,6 @@ BinanceRawFeedClient::BinanceRawFeedClient(const Subscription& subscription,
     auto url = ss.str();
     url.pop_back();
     websocket_->setUrl(url);
-
-    // Optional heart beat, sent every 45 seconds when there is not any traffic
-    // to make sure that load balancers do not kill an idle connection.
-    websocket_->setHeartBeatPeriod(45);
 
     // Setup a callback to be fired when a message or an event (open, close, error) is received
     websocket_->setOnMessageCallback(
